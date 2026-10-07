@@ -9,13 +9,18 @@ export function filenameFromDisposition(header: string | null): string | null {
 }
 
 /** Fetches a file with the session cookie and saves it through the browser. Failures throw ApiError. */
-export async function downloadFile(path: string, fallbackName: string): Promise<string> {
+export async function downloadFile(
+  path: string,
+  fallbackName: string
+): Promise<string> {
   const res = await fetch(`/api${path}`, { credentials: "same-origin" })
   if (!res.ok) {
     let message = res.statusText
     let code = "ERROR"
     try {
-      const body = (await res.json()) as { error?: { code?: string; message?: string } }
+      const body = (await res.json()) as {
+        error?: { code?: string; message?: string }
+      }
       message = body.error?.message ?? message
       code = body.error?.code ?? code
     } catch {
@@ -24,7 +29,9 @@ export async function downloadFile(path: string, fallbackName: string): Promise<
     throw new ApiError(res.status, code, message)
   }
   const blob = await res.blob()
-  const name = filenameFromDisposition(res.headers.get("content-disposition")) ?? fallbackName
+  const name =
+    filenameFromDisposition(res.headers.get("content-disposition")) ??
+    fallbackName
   const url = URL.createObjectURL(blob)
   const link = document.createElement("a")
   link.href = url

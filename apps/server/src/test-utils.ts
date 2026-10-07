@@ -1,7 +1,11 @@
 import { mkdirSync, mkdtempSync } from "node:fs"
 import { tmpdir } from "node:os"
 import { join } from "node:path"
-import type { ClientInput, InvoiceDoc, IssuerProfileInput } from "@workspace/shared"
+import type {
+  ClientInput,
+  InvoiceDoc,
+  IssuerProfileInput,
+} from "@workspace/shared"
 import { createApp } from "./app"
 import type { Config } from "./config"
 import { openDb, type Db } from "./db/client"
@@ -16,7 +20,10 @@ export interface TestEnv {
   clock: { now: Date }
 }
 
-export function makeEnv(start = "2026-06-15T10:00:00Z", pdf?: PdfRenderer): TestEnv {
+export function makeEnv(
+  start = "2026-06-15T10:00:00Z",
+  pdf?: PdfRenderer
+): TestEnv {
   const dataDir = mkdtempSync(join(tmpdir(), "invoice-test-"))
   const uploadsDir = join(dataDir, "uploads")
   mkdirSync(uploadsDir)
@@ -41,37 +48,64 @@ export function makeEnv(start = "2026-06-15T10:00:00Z", pdf?: PdfRenderer): Test
   return { deps, db, app: createApp(deps, pdf), clock }
 }
 
-export async function addUser(env: TestEnv, username: string, workspaceName: string, password = "password123") {
-  return createUser(env.db, { username, password, workspaceName, timezone: "Asia/Kolkata" }, env.clock.now)
+export async function addUser(
+  env: TestEnv,
+  username: string,
+  workspaceName: string,
+  password = "password123"
+) {
+  return createUser(
+    env.db,
+    { username, password, workspaceName, timezone: "Asia/Kolkata" },
+    env.clock.now
+  )
 }
 
 export class Client {
   cookie = ""
   constructor(private env: TestEnv) {}
 
-  async request(method: string, path: string, body?: unknown, headers: Record<string, string> = {}) {
-    const init: RequestInit = { method, headers: { ...headers, cookie: this.cookie } }
+  async request(
+    method: string,
+    path: string,
+    body?: unknown,
+    headers: Record<string, string> = {}
+  ) {
+    const init: RequestInit = {
+      method,
+      headers: { ...headers, cookie: this.cookie },
+    }
     if (body !== undefined) {
       init.body = JSON.stringify(body)
-      ;(init.headers as Record<string, string>)["content-type"] = "application/json"
+      ;(init.headers as Record<string, string>)["content-type"] =
+        "application/json"
     }
     return this.env.app.request(`http://localhost/api${path}`, init)
   }
 
-  async json<T = unknown>(method: string, path: string, body?: unknown): Promise<{ status: number; body: T }> {
+  async json<T = unknown>(
+    method: string,
+    path: string,
+    body?: unknown
+  ): Promise<{ status: number; body: T }> {
     const res = await this.request(method, path, body)
     return { status: res.status, body: (await res.json()) as T }
   }
 
   async login(username: string, password = "password123") {
-    const res = await this.request("POST", "/auth/login", { username, password })
+    const res = await this.request("POST", "/auth/login", {
+      username,
+      password,
+    })
     const set = res.headers.get("set-cookie")
     if (res.status === 200 && set) this.cookie = set.split(";")[0] ?? ""
     return res
   }
 }
 
-export const profileInput = (over: Partial<IssuerProfileInput> = {}): IssuerProfileInput => ({
+export const profileInput = (
+  over: Partial<IssuerProfileInput> = {}
+): IssuerProfileInput => ({
   displayName: "Menon Design",
   legalName: null,
   addressLines: ["Bengaluru"],
@@ -100,12 +134,24 @@ export const clientInput = (over: Partial<ClientInput> = {}): ClientInput => ({
 })
 
 /** Signs in a fresh user and creates a profile and a client. */
-export async function bootstrap(env: TestEnv, username = "demo", workspaceName = "Demo Studio") {
+export async function bootstrap(
+  env: TestEnv,
+  username = "demo",
+  workspaceName = "Demo Studio"
+) {
   await addUser(env, username, workspaceName)
   const client = new Client(env)
   await client.login(username)
-  const profile = (await client.json<{ id: string }>("POST", "/issuer-profiles", profileInput())).body
-  const customer = (await client.json<{ id: string }>("POST", "/clients", clientInput())).body
+  const profile = (
+    await client.json<{ id: string }>(
+      "POST",
+      "/issuer-profiles",
+      profileInput()
+    )
+  ).body
+  const customer = (
+    await client.json<{ id: string }>("POST", "/clients", clientInput())
+  ).body
   return { api: client, profile, customer }
 }
 

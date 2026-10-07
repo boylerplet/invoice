@@ -1,4 +1,9 @@
-import { Add01Icon, ArrowDown01Icon, ArrowUp01Icon, Delete02Icon } from "@hugeicons/core-free-icons"
+import {
+  Add01Icon,
+  ArrowDown01Icon,
+  ArrowUp01Icon,
+  Delete02Icon,
+} from "@hugeicons/core-free-icons"
 import type { LabelValue } from "@workspace/shared"
 import { Button } from "@workspace/ui/components/button"
 import { Input } from "@workspace/ui/components/input"
@@ -25,7 +30,9 @@ export function LabelValueEditor({
   max = 12,
 }: Props) {
   const update = (index: number, patch: Partial<LabelValue>) =>
-    onChange(value.map((line, i) => (i === index ? { ...line, ...patch } : line)))
+    onChange(
+      value.map((line, i) => (i === index ? { ...line, ...patch } : line))
+    )
   const move = (index: number, by: -1 | 1) => {
     const next = [...value]
     const target = index + by
@@ -57,21 +64,46 @@ export function LabelValueEditor({
           />
           {reorderable && (
             <>
-              <Button type="button" variant="ghost" size="icon-sm" aria-label="Move up" disabled={index === 0} onClick={() => move(index, -1)}>
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon-sm"
+                aria-label="Move up"
+                disabled={index === 0}
+                onClick={() => move(index, -1)}
+              >
                 <Icon icon={ArrowUp01Icon} />
               </Button>
-              <Button type="button" variant="ghost" size="icon-sm" aria-label="Move down" disabled={index === value.length - 1} onClick={() => move(index, 1)}>
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon-sm"
+                aria-label="Move down"
+                disabled={index === value.length - 1}
+                onClick={() => move(index, 1)}
+              >
                 <Icon icon={ArrowDown01Icon} />
               </Button>
             </>
           )}
-          <Button type="button" variant="ghost" size="icon-sm" aria-label="Remove line" onClick={() => onChange(value.filter((_, i) => i !== index))}>
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon-sm"
+            aria-label="Remove line"
+            onClick={() => onChange(value.filter((_, i) => i !== index))}
+          >
             <Icon icon={Delete02Icon} />
           </Button>
         </div>
       ))}
       {value.length < max && (
-        <Button type="button" variant="outline" size="sm" onClick={() => onChange([...value, { label: "", value: "" }])}>
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          onClick={() => onChange([...value, { label: "", value: "" }])}
+        >
           <Icon icon={Add01Icon} /> {addLabel}
         </Button>
       )}

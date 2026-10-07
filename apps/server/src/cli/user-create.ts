@@ -8,7 +8,9 @@ const username = stringArg(args, "username")
 const password = stringArg(args, "password")
 
 if (!username || !password) {
-  console.error('Usage: pnpm user:create --username <u> --password <p> --workspace "<Business name>" [--workspace-id <id>]')
+  console.error(
+    'Usage: pnpm user:create --username <u> --password <p> --workspace "<Business name>" [--workspace-id <id>]'
+  )
   process.exit(1)
 }
 
@@ -26,7 +28,9 @@ try {
     },
     new Date()
   )
-  console.log(`Created user "${user.username}" in workspace "${workspace.name}" (${workspace.id})`)
+  console.log(
+    `Created user "${user.username}" in workspace "${workspace.name}" (${workspace.id})`
+  )
 } catch (error) {
   console.error(error instanceof Error ? error.message : error)
   process.exit(1)

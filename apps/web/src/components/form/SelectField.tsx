@@ -13,6 +13,8 @@ export interface Option<T extends string = string> {
 
 interface SelectFieldProps<T extends string> {
   id?: string
+  /** Accessible name when no visible <label> points at the control. */
+  label?: string
   value: T | null
   onChange: (value: T) => void
   options: Option<T>[]
@@ -24,6 +26,7 @@ interface SelectFieldProps<T extends string> {
 /** A controlled select over a plain option list. */
 export function SelectField<T extends string>({
   id,
+  label,
   value,
   onChange,
   options,
@@ -38,7 +41,11 @@ export function SelectField<T extends string>({
       items={options}
       disabled={disabled}
     >
-      <SelectTrigger id={id} className={className ?? "w-full"}>
+      <SelectTrigger
+        id={id}
+        aria-label={label}
+        className={className ?? "w-full"}
+      >
         <SelectValue placeholder={placeholder} />
       </SelectTrigger>
       <SelectContent>

@@ -46,11 +46,19 @@ describe("transition table", () => {
 describe("overdue and aging", () => {
   const today = "2026-06-30"
   it("is overdue only when issued and past due", () => {
-    expect(isOverdue({ status: "ISSUED", dueDate: "2026-06-29" }, today)).toBe(true)
-    expect(isOverdue({ status: "ISSUED", dueDate: "2026-06-30" }, today)).toBe(false)
+    expect(isOverdue({ status: "ISSUED", dueDate: "2026-06-29" }, today)).toBe(
+      true
+    )
+    expect(isOverdue({ status: "ISSUED", dueDate: "2026-06-30" }, today)).toBe(
+      false
+    )
     expect(isOverdue({ status: "ISSUED", dueDate: null }, today)).toBe(false)
-    expect(isOverdue({ status: "PAID", dueDate: "2026-01-01" }, today)).toBe(false)
-    expect(isOverdue({ status: "DRAFT", dueDate: "2026-01-01" }, today)).toBe(false)
+    expect(isOverdue({ status: "PAID", dueDate: "2026-01-01" }, today)).toBe(
+      false
+    )
+    expect(isOverdue({ status: "DRAFT", dueDate: "2026-01-01" }, today)).toBe(
+      false
+    )
   })
   it("buckets by days past due", () => {
     const b = (dueDate: string | null) =>
@@ -62,6 +70,8 @@ describe("overdue and aging", () => {
     expect(b("2026-05-30")).toBe("31-60")
     expect(b("2026-05-01")).toBe("31-60")
     expect(b("2026-04-30")).toBe("61+")
-    expect(agingBucket({ status: "PAID", dueDate: "2026-01-01" }, today)).toBeNull()
+    expect(
+      agingBucket({ status: "PAID", dueDate: "2026-01-01" }, today)
+    ).toBeNull()
   })
 })

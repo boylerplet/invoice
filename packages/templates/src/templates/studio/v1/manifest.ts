@@ -18,7 +18,8 @@ export const manifest: TemplateManifest = {
   id: "studio",
   version: 1,
   name: "Studio",
-  description: "Restrained and typographic. Inter, hairline rules, a tinted meta strip and one blue accent.",
+  description:
+    "Restrained and typographic. Inter, hairline rules, a tinted meta strip and one blue accent.",
   tags: ["minimal", "typographic", "modern"],
   paper: { A4: { margins }, LETTER: { margins } },
   fonts: [
@@ -40,10 +41,34 @@ export const manifest: TemplateManifest = {
     "--accent": "#1F3DFF",
   },
   columns: [
-    { key: "description", label: "Description", width: "minmax(0, 1fr)", align: "left", hideWhenEmpty: false },
-    { key: "qty", label: "Qty", width: "24mm", align: "right", hideWhenEmpty: true },
-    { key: "rate", label: "Rate", width: "30mm", align: "right", hideWhenEmpty: true },
-    { key: "amount", label: "Amount", width: "34mm", align: "right", hideWhenEmpty: false },
+    {
+      key: "description",
+      label: "Description",
+      width: "minmax(0, 1fr)",
+      align: "left",
+      hideWhenEmpty: false,
+    },
+    {
+      key: "qty",
+      label: "Qty",
+      width: "24mm",
+      align: "right",
+      hideWhenEmpty: true,
+    },
+    {
+      key: "rate",
+      label: "Rate",
+      width: "30mm",
+      align: "right",
+      hideWhenEmpty: true,
+    },
+    {
+      key: "amount",
+      label: "Amount",
+      width: "34mm",
+      align: "right",
+      hideWhenEmpty: false,
+    },
   ],
   supports: {
     dueDate: true,

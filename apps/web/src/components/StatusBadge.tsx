@@ -19,10 +19,21 @@ const LABELS: Record<InvoiceStatus | "OVERDUE", string> = {
 }
 
 /** Overdue is derived: pass `overdue` for an ISSUED invoice that is past due. */
-export function StatusBadge({ status, overdue = false, className }: { status: InvoiceStatus; overdue?: boolean; className?: string }) {
+export function StatusBadge({
+  status,
+  overdue = false,
+  className,
+}: {
+  status: InvoiceStatus
+  overdue?: boolean
+  className?: string
+}) {
   const key = status === "ISSUED" && overdue ? "OVERDUE" : status
   return (
-    <Badge variant="ghost" className={cn("font-medium", STYLES[key], className)}>
+    <Badge
+      variant="ghost"
+      className={cn("font-medium", STYLES[key], className)}
+    >
       {LABELS[key]}
     </Badge>
   )

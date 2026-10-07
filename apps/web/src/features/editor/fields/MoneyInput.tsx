@@ -1,4 +1,9 @@
-import { minorToInput, parseMoneyInput, type CurrencyCode, type Minor } from "@workspace/shared"
+import {
+  minorToInput,
+  parseMoneyInput,
+  type CurrencyCode,
+  type Minor,
+} from "@workspace/shared"
 import { useState } from "react"
 import { Input } from "@workspace/ui/components/input"
 
@@ -14,9 +19,13 @@ interface MoneyInputProps {
   className?: string
 }
 
-const toText = (value: Minor | null, currency: CurrencyCode) => (value === null ? "" : minorToInput(value, currency))
+const toText = (value: Minor | null, currency: CurrencyCode) =>
+  value === null ? "" : minorToInput(value, currency)
 
-function parsed(text: string, currency: CurrencyCode): Minor | null | undefined {
+function parsed(
+  text: string,
+  currency: CurrencyCode
+): Minor | null | undefined {
   if (text.trim() === "") return null
   const result = parseMoneyInput(text, currency)
   return result.ok ? result.value : undefined
@@ -26,10 +35,17 @@ function parsed(text: string, currency: CurrencyCode): Minor | null | undefined 
  * Edits an amount in minor units as text in major units ("1,00,000.50").
  * The text is only replaced when the value changes from outside; typing never fights the cursor.
  */
-export function MoneyInput({ value, currency, onChange, invalid, ...rest }: MoneyInputProps) {
+export function MoneyInput({
+  value,
+  currency,
+  onChange,
+  invalid,
+  ...rest
+}: MoneyInputProps) {
   const [text, setText] = useState(() => toText(value, currency))
   const current = parsed(text, currency)
-  if (current !== undefined && current !== value) setText(toText(value, currency))
+  if (current !== undefined && current !== value)
+    setText(toText(value, currency))
 
   return (
     <Input

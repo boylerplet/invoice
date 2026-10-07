@@ -77,7 +77,11 @@ describe("buildInvoiceVM", () => {
       rate: null,
       amount: "200.00",
     })
-    expect(rows[1]).toMatchObject({ qty: "2", rate: "100.00", amount: "200.00" })
+    expect(rows[1]).toMatchObject({
+      qty: "2",
+      rate: "100.00",
+      amount: "200.00",
+    })
     expect(rows[2]?.amount).toBeNull()
   })
   it("hides fee fields of children in explicit mode", () => {

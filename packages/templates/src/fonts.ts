@@ -16,7 +16,8 @@ function urlFor(file: string): string {
   return url
 }
 
-const weightRange = (w: FontFaceDef["weight"]) => (Array.isArray(w) ? `${w[0]} ${w[1]}` : String(w))
+const weightRange = (w: FontFaceDef["weight"]) =>
+  Array.isArray(w) ? `${w[0]} ${w[1]}` : String(w)
 
 export function fontFaceCss(fonts: FontFaceDef[]): string {
   return fonts
@@ -52,7 +53,10 @@ export function loadTemplateFonts(manifest: TemplateManifest): Promise<void> {
     await Promise.all(
       manifest.fonts.map((f) => {
         const weight = Array.isArray(f.weight) ? f.weight[0] : f.weight
-        return document.fonts.load(`${f.style} ${weight} 1em "${f.family}"`, SAMPLE)
+        return document.fonts.load(
+          `${f.style} ${weight} 1em "${f.family}"`,
+          SAMPLE
+        )
       })
     )
     await document.fonts.ready

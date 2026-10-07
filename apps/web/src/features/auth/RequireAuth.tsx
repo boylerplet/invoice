@@ -16,7 +16,10 @@ export function RequireAuth() {
   }
   if (me.isError) return <Navigate to="/login" replace />
   return (
-    <AppShell workspaceName={me.data.workspace.name} username={me.data.user.username}>
+    <AppShell
+      workspaceName={me.data.workspace.name}
+      username={me.data.user.username}
+    >
       <Outlet />
     </AppShell>
   )

@@ -24,7 +24,9 @@ export function createBackupService(deps: Deps) {
         "data.json": strToU8(JSON.stringify(snapshot(ws), null, 2)),
       }
       for (const name of listUploads(deps.config.uploadsDir)) {
-        files[`uploads/${name}`] = readFileSync(join(deps.config.uploadsDir, name))
+        files[`uploads/${name}`] = readFileSync(
+          join(deps.config.uploadsDir, name)
+        )
       }
       return zipSync(files)
     },

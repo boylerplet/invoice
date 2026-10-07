@@ -21,7 +21,14 @@ export function buildUnits(vm: InvoiceVM): LayoutUnit[] {
       rows: firstChild ? [item, firstChild] : [item],
     })
     for (const child of others) {
-      units.push({ id: child.id, groupId: group.id, height: 0, kind: "child", isFirstInGroup: false, rows: [child] })
+      units.push({
+        id: child.id,
+        groupId: group.id,
+        height: 0,
+        kind: "child",
+        isFirstInGroup: false,
+        rows: [child],
+      })
     }
   }
   return units
@@ -29,10 +36,23 @@ export function buildUnits(vm: InvoiceVM): LayoutUnit[] {
 
 /** The repeated parent line shown at the top of a page when a group continues. */
 export function continuedRow(parent: RowVM): RowVM {
-  return { ...parent, kind: "continued", detail: null, qty: null, unit: null, rate: null, amount: null, isGroupParent: true }
+  return {
+    ...parent,
+    kind: "continued",
+    detail: null,
+    qty: null,
+    unit: null,
+    rate: null,
+    amount: null,
+    isGroupParent: true,
+  }
 }
 
 /** Last row id of every group, so templates can close a group with a rule. */
 export function lastRowIds(vm: InvoiceVM): Set<string> {
-  return new Set(vm.groups.flatMap((g) => (g.rows.length > 0 ? [g.rows[g.rows.length - 1]?.id ?? ""] : [])))
+  return new Set(
+    vm.groups.flatMap((g) =>
+      g.rows.length > 0 ? [g.rows[g.rows.length - 1]?.id ?? ""] : []
+    )
+  )
 }

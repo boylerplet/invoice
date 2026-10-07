@@ -19,7 +19,13 @@ const counter = () => {
 describe("docOps", () => {
   it("creates blank items with a pricing mode and no quantity", () => {
     const blank = blankItem(counter())
-    expect(blank).toMatchObject({ id: "n1", pricing: "explicit", qty: null, rate: null, children: [] })
+    expect(blank).toMatchObject({
+      id: "n1",
+      pricing: "explicit",
+      qty: null,
+      rate: null,
+      children: [],
+    })
   })
 
   it("clones an item with fresh ids for it and its children", () => {
@@ -48,9 +54,15 @@ describe("docOps", () => {
   })
 
   it("enforces item and child limits", () => {
-    expect(canAddItem({ items: Array.from({ length: 199 }, () => item()) })).toBe(true)
-    expect(canAddItem({ items: Array.from({ length: 200 }, () => item()) })).toBe(false)
-    expect(canAddChild({ children: Array.from({ length: 20 }, () => child()) })).toBe(false)
+    expect(
+      canAddItem({ items: Array.from({ length: 199 }, () => item()) })
+    ).toBe(true)
+    expect(
+      canAddItem({ items: Array.from({ length: 200 }, () => item()) })
+    ).toBe(false)
+    expect(
+      canAddChild({ children: Array.from({ length: 20 }, () => child()) })
+    ).toBe(false)
   })
 
   it("suggests payment accounts by preference, currency and profile", () => {
@@ -70,8 +82,12 @@ describe("docOps", () => {
       account({ id: "mine", issuerProfileId: "p1" }),
       account({ id: "old", archivedAt: "2026-01-01" }),
     ]
-    expect(suggestPaymentAccount(accounts, "INR", ["old", null], "p1")?.id).toBe("mine")
-    expect(suggestPaymentAccount(accounts, "INR", ["mine"], "p1")?.id).toBe("mine")
+    expect(
+      suggestPaymentAccount(accounts, "INR", ["old", null], "p1")?.id
+    ).toBe("mine")
+    expect(suggestPaymentAccount(accounts, "INR", ["mine"], "p1")?.id).toBe(
+      "mine"
+    )
     expect(suggestPaymentAccount(accounts, "USD", [], "p1")?.id).toBe("usd")
     expect(suggestPaymentAccount([], "INR", [], "p1")).toBeUndefined()
   })

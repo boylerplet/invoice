@@ -1,5 +1,11 @@
 import type { CSSProperties, FC, ReactNode } from "react"
-import { templateKey, type ColumnSpec, type InvoiceVM, type RowVM, type TemplateModule } from "../contract"
+import {
+  templateKey,
+  type ColumnSpec,
+  type InvoiceVM,
+  type RowVM,
+  type TemplateModule,
+} from "../contract"
 import { rootVars } from "./columns"
 
 interface RootProps {
@@ -12,9 +18,18 @@ interface RootProps {
 }
 
 /** Scope element: carries the template class and tokens. Used by pages and by the measure layer. */
-export const TemplateRoot: FC<RootProps> = ({ template, columns, style, className, children, ...rest }) => (
+export const TemplateRoot: FC<RootProps> = ({
+  template,
+  columns,
+  style,
+  className,
+  children,
+  ...rest
+}) => (
   <div
-    className={[templateKey(template.manifest), className].filter(Boolean).join(" ")}
+    className={[templateKey(template.manifest), className]
+      .filter(Boolean)
+      .join(" ")}
     style={{ ...rootVars(template.manifest, columns), ...style }}
     {...rest}
   >
@@ -33,7 +48,15 @@ interface RowBlockProps {
 }
 
 /** A row wrapped in a flow-root box so its measured height equals its rendered height. */
-export const RowBlock: FC<RowBlockProps> = ({ template, vm, row, columns, isFirstOnPage, isLastOnPage, isLastInGroup }) => (
+export const RowBlock: FC<RowBlockProps> = ({
+  template,
+  vm,
+  row,
+  columns,
+  isFirstOnPage,
+  isLastOnPage,
+  isLastInGroup,
+}) => (
   <div style={{ display: "flow-root" }}>
     <template.Row
       vm={vm}

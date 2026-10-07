@@ -17,7 +17,10 @@ import { createInvoiceService } from "./services/invoices"
 import { createPdfRenderer, type PdfRenderer } from "./services/pdf"
 import { createStatsService } from "./services/stats"
 
-export function createApp(deps: Deps, pdf: PdfRenderer = createPdfRenderer(deps.config)) {
+export function createApp(
+  deps: Deps,
+  pdf: PdfRenderer = createPdfRenderer(deps.config)
+) {
   const app = new Hono<AppEnv>()
   const stats = createStatsService(deps)
   const invoices = createInvoiceService(deps)
@@ -27,12 +30,21 @@ export function createApp(deps: Deps, pdf: PdfRenderer = createPdfRenderer(deps.
   app.onError((error, c) => {
     if (error instanceof ApiError) {
       return c.json(
-        { error: { code: error.code, message: error.message, fields: error.fields } },
+        {
+          error: {
+            code: error.code,
+            message: error.message,
+            fields: error.fields,
+          },
+        },
         error.status
       )
     }
     console.error(error)
-    return c.json({ error: { code: "INTERNAL", message: "Something went wrong" } }, 500)
+    return c.json(
+      { error: { code: "INTERNAL", message: "Something went wrong" } },
+      500
+    )
   })
 
   const api = new Hono<AppEnv>()
@@ -50,14 +62,19 @@ export function createApp(deps: Deps, pdf: PdfRenderer = createPdfRenderer(deps.
   secured.route("/invoices", invoiceRoutes(deps, invoices, pdf))
   secured.route("/", overviewRoutes(deps, stats, backup))
   api.route("/", secured)
-  api.notFound((c) => c.json({ error: { code: "NOT_FOUND", message: "Unknown endpoint" } }, 404))
+  api.notFound((c) =>
+    c.json({ error: { code: "NOT_FOUND", message: "Unknown endpoint" } }, 404)
+  )
   app.route("/api", api)
 
   // Logos are served by unguessable file name so the print page can load them without a cookie.
   app.use(
     "/uploads/*",
     async (c, next) => {
-      c.header("Content-Security-Policy", "default-src 'none'; style-src 'unsafe-inline'; sandbox")
+      c.header(
+        "Content-Security-Policy",
+        "default-src 'none'; style-src 'unsafe-inline'; sandbox"
+      )
       c.header("X-Content-Type-Options", "nosniff")
       await next()
     },
@@ -68,7 +85,10 @@ export function createApp(deps: Deps, pdf: PdfRenderer = createPdfRenderer(deps.
   )
 
   if (existsSync(join(deps.config.webDist, "index.html"))) {
-    app.use("*", serveStatic({ root: relative(process.cwd(), deps.config.webDist) || "." }))
+    app.use(
+      "*",
+      serveStatic({ root: relative(process.cwd(), deps.config.webDist) || "." })
+    )
     const html = readFileSync(join(deps.config.webDist, "index.html"), "utf8")
     app.get("*", (c) => c.html(html))
   }

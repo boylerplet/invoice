@@ -112,11 +112,19 @@ export function createInvoiceService(deps: Deps) {
     }
   }
 
-  function allocate(tx: DbLike, ws: string, settings: WorkspaceSettings, issueDate: string) {
+  function allocate(
+    tx: DbLike,
+    ws: string,
+    settings: WorkspaceSettings,
+    issueDate: string
+  ) {
     const repo = invoicesRepo(tx)
     const key = periodKey(settings.numbering, issueDate)
-    const allocation = allocateNumber(settings.numbering, issueDate, repo.lastSequence(ws, key), (n) =>
-      repo.numberTaken(ws, n)
+    const allocation = allocateNumber(
+      settings.numbering,
+      issueDate,
+      repo.lastSequence(ws, key),
+      (n) => repo.numberTaken(ws, n)
     )
     repo.raiseSequence(ws, key, allocation.counter)
     return allocation
@@ -126,7 +134,8 @@ export function createInvoiceService(deps: Deps) {
   function assertIssuable(doc: InvoiceDoc): InvoiceDoc {
     const strict = parse(invoiceDocSchema, doc)
     const problems = validateCalculation(calculate(strict))
-    if (problems.length > 0) throw new ApiError(422, "VALIDATION", problems[0] ?? "Invalid invoice")
+    if (problems.length > 0)
+      throw new ApiError(422, "VALIDATION", problems[0] ?? "Invalid invoice")
     return strict
   }
 
@@ -149,24 +158,45 @@ export function createInvoiceService(deps: Deps) {
     }
   }
 
-  function applyTransition(status: InvoiceRow["status"], action: TransitionAction) {
+  function applyTransition(
+    status: InvoiceRow["status"],
+    action: TransitionAction
+  ) {
     try {
       return transition(status, action)
     } catch (error) {
-      if (error instanceof LifecycleError) throw new ApiError(409, "INVALID_TRANSITION", error.message)
+      if (error instanceof LifecycleError)
+        throw new ApiError(409, "INVALID_TRANSITION", error.message)
       throw error
     }
   }
 
-  function log(tx: DbLike, auth: AuthContext, row: InvoiceRow, type: string, summary: string) {
+  function log(
+    tx: DbLike,
+    auth: AuthContext,
+    row: InvoiceRow,
+    type: string,
+    summary: string
+  ) {
     activityRepo(tx).log(
       auth.workspaceId,
-      { userId: auth.userId, invoiceId: row.id, clientId: row.clientId, type, summary },
+      {
+        userId: auth.userId,
+        invoiceId: row.id,
+        clientId: row.clientId,
+        type,
+        summary,
+      },
       deps.now()
     )
   }
 
-  function newDraft(tx: DbLike, auth: AuthContext, doc: InvoiceDoc, settings: WorkspaceSettings): InvoiceRow {
+  function newDraft(
+    tx: DbLike,
+    auth: AuthContext,
+    doc: InvoiceDoc,
+    settings: WorkspaceSettings
+  ): InvoiceRow {
     const allocation = allocate(tx, auth.workspaceId, settings, doc.issueDate)
     const numbered = { ...doc, number: allocation.number }
     const stamp = deps.now().toISOString()
@@ -201,14 +231,19 @@ export function createInvoiceService(deps: Deps) {
       if (!client) throw notFound("Client")
       const profiles = profilesRepo(db).list(ws)
       const profile =
-        profiles.find((p) => p.id === (input.issuerProfileId ?? client.defaultIssuerProfileId)) ??
+        profiles.find(
+          (p) =>
+            p.id === (input.issuerProfileId ?? client.defaultIssuerProfileId)
+        ) ??
         profiles.find((p) => p.isDefault) ??
         profiles[0]
-      if (!profile) throw new ApiError(422, "NO_PROFILE", "Create an issuer profile first")
+      if (!profile)
+        throw new ApiError(422, "NO_PROFILE", "Create an issuer profile first")
 
       const currency = client.defaultCurrency ?? settings.defaultCurrency
       const accounts = paymentAccountsRepo(db)
-      const accountId = client.defaultPaymentAccountId ?? profile.defaultPaymentAccountId
+      const accountId =
+        client.defaultPaymentAccountId ?? profile.defaultPaymentAccountId
       const account = accountId ? accounts.get(ws, accountId) : undefined
       const issueDate = todayIn(workspace.timezone, deps.now())
       const dueDays = client.defaultDueDays ?? settings.defaultDueDays
@@ -244,7 +279,11 @@ export function createInvoiceService(deps: Deps) {
         },
         payment:
           account && account.currency === currency
-            ? { accountId: account.id, title: "Payment details", lines: account.lines }
+            ? {
+                accountId: account.id,
+                title: "Payment details",
+                lines: account.lines,
+              }
             : null,
         items: [blankItem()],
         adjustments: [],
@@ -259,7 +298,13 @@ export function createInvoiceService(deps: Deps) {
       const row = db.transaction(
         (tx) => {
           const created = newDraft(tx, auth, doc, settings)
-          log(tx, auth, created, "invoice.created", `Created draft ${created.number} for ${client.name}`)
+          log(
+            tx,
+            auth,
+            created,
+            "invoice.created",
+            `Created draft ${created.number} for ${client.name}`
+          )
           return created
         },
         { behavior: "immediate" }
@@ -267,13 +312,22 @@ export function createInvoiceService(deps: Deps) {
       return toDetail(row, issueDate)
     },
 
-    save(auth: AuthContext, id: string, input: SaveInvoiceInput): InvoiceDetail {
+    save(
+      auth: AuthContext,
+      id: string,
+      input: SaveInvoiceInput
+    ): InvoiceDetail {
       const ws = auth.workspaceId
       const row = load(ws, id)
-      if (row.deletedAt) throw new ApiError(409, "DELETED", "This invoice was discarded")
+      if (row.deletedAt)
+        throw new ApiError(409, "DELETED", "This invoice was discarded")
       const mode = editMode(row.status)
       if (mode === "readonly") {
-        throw new ApiError(409, "READ_ONLY", `A ${row.status.toLowerCase()} invoice cannot be edited`)
+        throw new ApiError(
+          409,
+          "READ_ONLY",
+          `A ${row.status.toLowerCase()} invoice cannot be edited`
+        )
       }
       const doc = mode === "manual" ? assertIssuable(input.doc) : input.doc
       const settings = workspaceOf(ws).settings
@@ -283,14 +337,31 @@ export function createInvoiceService(deps: Deps) {
           const repo = invoicesRepo(tx)
           if (doc.number !== row.number) {
             if (repo.numberTaken(ws, doc.number, row.id)) {
-              throw new ApiError(409, "NUMBER_TAKEN", `Invoice number ${doc.number} is already used`, {
-                "doc.number": "Already used",
-              })
+              throw new ApiError(
+                409,
+                "NUMBER_TAKEN",
+                `Invoice number ${doc.number} is already used`,
+                {
+                  "doc.number": "Already used",
+                }
+              )
             }
-            const counter = parseCounter(settings.numbering, doc.issueDate, doc.number)
-            if (counter !== null) repo.raiseSequence(ws, periodKey(settings.numbering, doc.issueDate), counter)
+            const counter = parseCounter(
+              settings.numbering,
+              doc.issueDate,
+              doc.number
+            )
+            if (counter !== null)
+              repo.raiseSequence(
+                ws,
+                periodKey(settings.numbering, doc.issueDate),
+                counter
+              )
           }
-          const patch: Partial<InvoiceRow> = { ...rowFromDoc(doc), updatedAt: deps.now().toISOString() }
+          const patch: Partial<InvoiceRow> = {
+            ...rowFromDoc(doc),
+            updatedAt: deps.now().toISOString(),
+          }
           if (mode === "manual") {
             const revision = row.revision + 1
             patch.revision = revision
@@ -301,7 +372,13 @@ export function createInvoiceService(deps: Deps) {
               note: input.changeNote || null,
               createdAt: deps.now().toISOString(),
             })
-            log(tx, auth, row, "invoice.edited", `Saved revision ${revision} of ${doc.number}`)
+            log(
+              tx,
+              auth,
+              row,
+              "invoice.edited",
+              `Saved revision ${revision} of ${doc.number}`
+            )
           }
           repo.update(ws, row.id, patch)
           const updated = repo.get(ws, row.id)
@@ -315,12 +392,17 @@ export function createInvoiceService(deps: Deps) {
     issue(auth: AuthContext, id: string): InvoiceDetail {
       const ws = auth.workspaceId
       const row = load(ws, id)
-      if (row.deletedAt) throw new ApiError(409, "DELETED", "This invoice was discarded")
+      if (row.deletedAt)
+        throw new ApiError(409, "DELETED", "This invoice was discarded")
       const status = applyTransition(row.status, "issue")
       const doc = assertIssuable(row.data)
       return db.transaction((tx) => {
         const repo = invoicesRepo(tx)
-        repo.update(ws, id, { status, revision: 1, updatedAt: deps.now().toISOString() })
+        repo.update(ws, id, {
+          status,
+          revision: 1,
+          updatedAt: deps.now().toISOString(),
+        })
         repo.insertRevision(ws, id, {
           revision: 1,
           data: doc,
@@ -360,7 +442,12 @@ export function createInvoiceService(deps: Deps) {
       const status = applyTransition(row.status, "reopen")
       return db.transaction((tx) => {
         const repo = invoicesRepo(tx)
-        repo.update(ws, id, { status, paidAt: null, paidNote: null, updatedAt: deps.now().toISOString() })
+        repo.update(ws, id, {
+          status,
+          paidAt: null,
+          paidNote: null,
+          updatedAt: deps.now().toISOString(),
+        })
         log(tx, auth, row, "invoice.reopened", `Reopened ${row.number}`)
         const updated = repo.get(ws, id)
         if (!updated) throw notFound("Invoice")
@@ -375,7 +462,12 @@ export function createInvoiceService(deps: Deps) {
       return db.transaction((tx) => {
         const repo = invoicesRepo(tx)
         const stamp = deps.now().toISOString()
-        repo.update(ws, id, { status, cancelledAt: stamp, cancelReason: input.reason || null, updatedAt: stamp })
+        repo.update(ws, id, {
+          status,
+          cancelledAt: stamp,
+          cancelReason: input.reason || null,
+          updatedAt: stamp,
+        })
         log(tx, auth, row, "invoice.cancelled", `Cancelled ${row.number}`)
         const updated = repo.get(ws, id)
         if (!updated) throw notFound("Invoice")
@@ -394,18 +486,28 @@ export function createInvoiceService(deps: Deps) {
       const doc: InvoiceDoc = {
         ...source.data,
         issueDate,
-        dueDate: source.data.dueDate === null ? null : addDays(issueDate, dueDays),
+        dueDate:
+          source.data.dueDate === null ? null : addDays(issueDate, dueDays),
         items: source.data.items.map((item) => ({
           ...item,
           id: newId(),
           children: item.children.map((c) => ({ ...c, id: newId() })),
         })),
-        adjustments: source.data.adjustments.map((a) => ({ ...a, id: newId() })),
+        adjustments: source.data.adjustments.map((a) => ({
+          ...a,
+          id: newId(),
+        })),
       }
       const row = db.transaction(
         (tx) => {
           const created = newDraft(tx, auth, doc, settings)
-          log(tx, auth, created, "invoice.duplicated", `Duplicated ${source.number} as ${created.number}`)
+          log(
+            tx,
+            auth,
+            created,
+            "invoice.duplicated",
+            `Duplicated ${source.number} as ${created.number}`
+          )
           return created
         },
         { behavior: "immediate" }
@@ -416,7 +518,12 @@ export function createInvoiceService(deps: Deps) {
     discard(auth: AuthContext, id: string): InvoiceDetail {
       const ws = auth.workspaceId
       const row = load(ws, id)
-      if (row.status !== "DRAFT") throw new ApiError(409, "INVALID_TRANSITION", "Only drafts can be discarded")
+      if (row.status !== "DRAFT")
+        throw new ApiError(
+          409,
+          "INVALID_TRANSITION",
+          "Only drafts can be discarded"
+        )
       if (row.deletedAt) throw new ApiError(409, "DELETED", "Already discarded")
       return db.transaction((tx) => {
         const repo = invoicesRepo(tx)
@@ -432,10 +539,18 @@ export function createInvoiceService(deps: Deps) {
     restore(auth: AuthContext, id: string): InvoiceDetail {
       const ws = auth.workspaceId
       const row = load(ws, id)
-      if (!row.deletedAt) throw new ApiError(409, "NOT_DELETED", "This invoice is not in the trash")
+      if (!row.deletedAt)
+        throw new ApiError(
+          409,
+          "NOT_DELETED",
+          "This invoice is not in the trash"
+        )
       return db.transaction((tx) => {
         const repo = invoicesRepo(tx)
-        repo.update(ws, id, { deletedAt: null, updatedAt: deps.now().toISOString() })
+        repo.update(ws, id, {
+          deletedAt: null,
+          updatedAt: deps.now().toISOString(),
+        })
         log(tx, auth, row, "invoice.restored", `Restored draft ${row.number}`)
         const updated = repo.get(ws, id)
         if (!updated) throw notFound("Invoice")
@@ -447,22 +562,40 @@ export function createInvoiceService(deps: Deps) {
       load(ws, id)
       return invoicesRepo(db)
         .listRevisions(ws, id)
-        .map((r) => ({ revision: r.revision, totalMinor: r.totalMinor, note: r.note, createdAt: r.createdAt }))
+        .map((r) => ({
+          revision: r.revision,
+          totalMinor: r.totalMinor,
+          note: r.note,
+          createdAt: r.createdAt,
+        }))
     },
 
     revision(ws: string, id: string, revision: number) {
       load(ws, id)
       const row = invoicesRepo(db).getRevision(ws, id, revision)
       if (!row) throw notFound("Revision")
-      return { revision: row.revision, totalMinor: row.totalMinor, note: row.note, createdAt: row.createdAt, doc: row.data }
+      return {
+        revision: row.revision,
+        totalMinor: row.totalMinor,
+        note: row.note,
+        createdAt: row.createdAt,
+        doc: row.data,
+      }
     },
 
     /** Preview of the next auto number (does not consume it). */
-    nextNumberPreview(ws: string, numbering: NumberingSettings | undefined, date: string | undefined) {
+    nextNumberPreview(
+      ws: string,
+      numbering: NumberingSettings | undefined,
+      date: string | undefined
+    ) {
       const workspace = workspaceOf(ws)
       const effective = numbering ?? workspace.settings.numbering
       const issueDate = date ?? todayIn(workspace.timezone, deps.now())
-      const last = invoicesRepo(db).lastSequence(ws, periodKey(effective, issueDate))
+      const last = invoicesRepo(db).lastSequence(
+        ws,
+        periodKey(effective, issueDate)
+      )
       return { number: previewNextNumber(effective, issueDate, last) }
     },
 

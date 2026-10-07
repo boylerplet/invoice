@@ -43,7 +43,9 @@ function itemAmount(item: Item, children: CalculatedChild[]): Minor | null {
     case "explicit":
       return lineAmount(item.qty, item.rate)
     case "rollup": {
-      const priced = children.flatMap((c) => (c.amount === null ? [] : [c.amount]))
+      const priced = children.flatMap((c) =>
+        c.amount === null ? [] : [c.amount]
+      )
       return priced.length === 0 ? null : sumMinor(priced)
     }
     case "none":
@@ -54,18 +56,32 @@ function itemAmount(item: Item, children: CalculatedChild[]): Minor | null {
 /** Pure and deterministic. Only parent amounts enter the subtotal. */
 export function calculate(doc: InvoiceDoc): CalculatedInvoice {
   const items = doc.items.map((item): CalculatedItem => {
-    const children = item.children.map((c) => ({ id: c.id, amount: childAmount(item, c) }))
+    const children = item.children.map((c) => ({
+      id: c.id,
+      amount: childAmount(item, c),
+    }))
     return { id: item.id, amount: itemAmount(item, children), children }
   })
-  const subtotal = sumMinor(items.flatMap((i) => (i.amount === null ? [] : [i.amount])))
+  const subtotal = sumMinor(
+    items.flatMap((i) => (i.amount === null ? [] : [i.amount]))
+  )
 
   const adjustments = doc.adjustments.map((adj): CalculatedAdjustment => {
-    const magnitude = adj.valueType === "fixed" ? Number(adj.value) : percentOf(subtotal, adj.value)
-    return { id: adj.id, label: adj.label, kind: adj.kind, amount: adj.kind === "discount" ? -magnitude : magnitude }
+    const magnitude =
+      adj.valueType === "fixed"
+        ? Number(adj.value)
+        : percentOf(subtotal, adj.value)
+    return {
+      id: adj.id,
+      label: adj.label,
+      kind: adj.kind,
+      amount: adj.kind === "discount" ? -magnitude : magnitude,
+    }
   })
 
   const taxable = subtotal + sumMinor(adjustments.map((a) => a.amount))
-  const taxAmount = doc.tax.enabled && taxable > 0 ? percentOf(taxable, doc.tax.rate) : 0
+  const taxAmount =
+    doc.tax.enabled && taxable > 0 ? percentOf(taxable, doc.tax.rate) : 0
   return {
     items,
     subtotal,

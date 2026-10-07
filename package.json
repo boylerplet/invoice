@@ -11,15 +11,17 @@
     "test:e2e": "playwright test",
     "typecheck": "pnpm -r typecheck && tsc -p scripts/tsconfig.json && tsc -p e2e/tsconfig.json",
     "lint": "pnpm -r lint",
-    "format": "prettier --write \"**/*.{ts,tsx,css,md}\"",
+    "format": "prettier --write \"apps/**/*.{ts,tsx}\" \"packages/**/*.{ts,tsx,css}\" \"e2e/**/*.ts\" \"scripts/**/*.ts\" \"*.ts\" README.md",
     "db:migrate": "pnpm --filter server exec tsx src/cli/db-migrate.ts",
     "db:reset": "pnpm --filter server exec tsx src/cli/db-reset.ts",
     "user:create": "pnpm --filter server exec tsx src/cli/user-create.ts",
     "fonts:add": "pnpm --filter @workspace/templates exec tsx scripts/fonts-add.ts",
     "template:shots": "tsx scripts/template-shots.ts",
-    "e2e:server": "cross-env DATA_DIR=./.e2e-data PORT=3002 WEB_PORT=5174 pnpm db:reset && cross-env DATA_DIR=./.e2e-data PORT=3002 WEB_PORT=5174 pnpm user:create --username demo --password demo1234 --workspace \"Menon Design Studio\" && cross-env DATA_DIR=./.e2e-data PORT=3002 WEB_PORT=5174 pnpm -r --parallel --filter web --filter server e2e"
+    "e2e:server": "cross-env DATA_DIR=./.e2e-data PORT=3002 WEB_PORT=5174 pnpm db:reset && cross-env DATA_DIR=./.e2e-data PORT=3002 WEB_PORT=5174 pnpm db:seed && cross-env DATA_DIR=./.e2e-data PORT=3002 WEB_PORT=5174 pnpm -r --parallel --filter web --filter server e2e",
+    "db:seed": "pnpm --filter server exec tsx src/cli/db-seed.ts"
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.13.0",
     "@napi-rs/canvas": "^1.0.10",
     "@playwright/test": "^1.63.0",
     "@types/node": "^24.19.1",

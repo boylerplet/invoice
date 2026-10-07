@@ -63,7 +63,11 @@ export function previewNextNumber(
   iso: string,
   lastValue = 0
 ): string {
-  return formatNumber(settings, iso, Math.max(lastValue + 1, settings.startNumber))
+  return formatNumber(
+    settings,
+    iso,
+    Math.max(lastValue + 1, settings.startNumber)
+  )
 }
 
 export interface Allocation {

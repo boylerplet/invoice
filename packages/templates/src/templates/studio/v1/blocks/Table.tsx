@@ -1,7 +1,9 @@
 import type { FC } from "react"
 import type { RowProps, TableHeadProps } from "../../../../contract"
 
-const alignStyle = (align: "left" | "center" | "right") => ({ textAlign: align })
+const alignStyle = (align: "left" | "center" | "right") => ({
+  textAlign: align,
+})
 
 export const TableHead: FC<TableHeadProps> = ({ columns }) => (
   <div className="thead">
@@ -25,7 +27,8 @@ export const Row: FC<RowProps> = ({ row, columns, isLastInGroup }) => {
   if (!isChild && !isContinued && row.isGroupParent) classes.push("row--open")
   if (isChild && !isLastInGroup) classes.push("row--open")
 
-  const qty = row.qty === null ? "" : row.unit ? `${row.qty} ${row.unit}` : row.qty
+  const qty =
+    row.qty === null ? "" : row.unit ? `${row.qty} ${row.unit}` : row.qty
 
   return (
     <div className={classes.join(" ")}>
@@ -41,19 +44,31 @@ export const Row: FC<RowProps> = ({ row, columns, isLastInGroup }) => {
             )
           case "qty":
             return (
-              <div key={col.key} className="row__cell" style={alignStyle(col.align)}>
+              <div
+                key={col.key}
+                className="row__cell"
+                style={alignStyle(col.align)}
+              >
                 {qty}
               </div>
             )
           case "rate":
             return (
-              <div key={col.key} className="row__cell" style={alignStyle(col.align)}>
+              <div
+                key={col.key}
+                className="row__cell"
+                style={alignStyle(col.align)}
+              >
                 {row.rate ?? ""}
               </div>
             )
           case "amount":
             return (
-              <div key={col.key} className="row__amount" style={alignStyle(col.align)}>
+              <div
+                key={col.key}
+                className="row__amount"
+                style={alignStyle(col.align)}
+              >
                 {row.amount ?? ""}
               </div>
             )

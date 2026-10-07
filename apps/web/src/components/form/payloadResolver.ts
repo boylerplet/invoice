@@ -1,4 +1,9 @@
-import { set, type FieldErrors, type FieldValues, type Resolver } from "react-hook-form"
+import {
+  set,
+  type FieldErrors,
+  type FieldValues,
+  type Resolver,
+} from "react-hook-form"
 import type { ZodType } from "zod"
 
 /**
@@ -16,14 +21,16 @@ export function payloadResolver<V extends FieldValues, P>(
     const errors: FieldErrors<V> = {}
     for (const issue of result.error.issues) {
       const path = mapPath(issue.path.join("."))
-      if (path !== "") set(errors, path, { type: issue.code, message: issue.message })
+      if (path !== "")
+        set(errors, path, { type: issue.code, message: issue.message })
     }
     return { values: {}, errors }
   }
 }
 
 /** Blank text becomes null (the API stores absent values as null). */
-export const toNull = (value: string): string | null => (value.trim() === "" ? null : value.trim())
+export const toNull = (value: string): string | null =>
+  value.trim() === "" ? null : value.trim()
 
 export const linesToText = (lines: string[]): string => lines.join("\n")
 

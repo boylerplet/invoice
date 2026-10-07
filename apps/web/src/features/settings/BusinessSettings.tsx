@@ -1,9 +1,20 @@
-import { workspaceUpdateSchema, CURRENCY_CODES, CURRENCIES, type WorkspaceUpdate } from "@workspace/shared"
+import {
+  workspaceUpdateSchema,
+  CURRENCY_CODES,
+  CURRENCIES,
+  type WorkspaceUpdate,
+} from "@workspace/shared"
 import { listTemplates } from "@workspace/templates"
 import { useForm, Controller } from "react-hook-form"
 import { toast } from "sonner"
 import { Button } from "@workspace/ui/components/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@workspace/ui/components/card"
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@workspace/ui/components/card"
 import { Input } from "@workspace/ui/components/input"
 import { Textarea } from "@workspace/ui/components/textarea"
 import { Field } from "@/components/form/Field"
@@ -25,7 +36,10 @@ interface Values {
 
 const TIMEZONES = Intl.supportedValuesOf("timeZone")
 
-function toPayload(values: Values, base: WorkspaceUpdate["settings"]): WorkspaceUpdate {
+function toPayload(
+  values: Values,
+  base: WorkspaceUpdate["settings"]
+): WorkspaceUpdate {
   return {
     name: values.name.trim(),
     timezone: values.timezone,
@@ -56,11 +70,19 @@ export function BusinessSettings() {
       defaultPaymentTerms: workspace.settings.defaultPaymentTerms ?? "",
       defaultNotes: workspace.settings.defaultNotes ?? "",
     },
-    resolver: workspace && payloadResolver(workspaceUpdateSchema, (v: Values) => toPayload(v, workspace.settings), (path) => path.replace(/^settings./, "")),
+    resolver:
+      workspace &&
+      payloadResolver(
+        workspaceUpdateSchema,
+        (v: Values) => toPayload(v, workspace.settings),
+        (path) => path.replace(/^settings./, "")
+      ),
   })
   if (!workspace) return null
   const errors = form.formState.errors
-  const templates = [...new Map(listTemplates().map((t) => [t.id, t.name])).entries()].map(([value, label]) => ({ value, label }))
+  const templates = [
+    ...new Map(listTemplates().map((t) => [t.id, t.name])).entries(),
+  ].map(([value, label]) => ({ value, label }))
 
   const onSubmit = form.handleSubmit(async (values) => {
     try {
@@ -76,18 +98,35 @@ export function BusinessSettings() {
       <Card>
         <CardHeader>
           <CardTitle>Business</CardTitle>
-          <CardDescription>Used for dates, defaults on new invoices and the workspace name.</CardDescription>
+          <CardDescription>
+            Used for dates, defaults on new invoices and the workspace name.
+          </CardDescription>
         </CardHeader>
         <CardContent className="grid gap-4 sm:grid-cols-2">
-          <Field label="Business name" htmlFor="name" error={errors.name?.message} className="sm:col-span-2">
+          <Field
+            label="Business name"
+            htmlFor="name"
+            error={errors.name?.message}
+            className="sm:col-span-2"
+          >
             <Input id="name" {...form.register("name")} />
           </Field>
-          <Field label="Timezone" htmlFor="timezone" error={errors.timezone?.message} hint="'Today' on invoices follows this timezone.">
+          <Field
+            label="Timezone"
+            htmlFor="timezone"
+            error={errors.timezone?.message}
+            hint="'Today' on invoices follows this timezone."
+          >
             <Controller
               control={form.control}
               name="timezone"
               render={({ field }) => (
-                <SelectField id="timezone" value={field.value} onChange={field.onChange} options={TIMEZONES.map((tz) => ({ value: tz, label: tz }))} />
+                <SelectField
+                  id="timezone"
+                  value={field.value}
+                  onChange={field.onChange}
+                  options={TIMEZONES.map((tz) => ({ value: tz, label: tz }))}
+                />
               )}
             />
           </Field>
@@ -100,7 +139,10 @@ export function BusinessSettings() {
                   id="currency"
                   value={field.value}
                   onChange={field.onChange}
-                  options={CURRENCY_CODES.map((code) => ({ value: code, label: `${code} (${CURRENCIES[code].symbol})` }))}
+                  options={CURRENCY_CODES.map((code) => ({
+                    value: code,
+                    label: `${code} (${CURRENCIES[code].symbol})`,
+                  }))}
                 />
               )}
             />
@@ -110,7 +152,15 @@ export function BusinessSettings() {
               control={form.control}
               name="defaultPaperSize"
               render={({ field }) => (
-                <SelectField id="paper" value={field.value} onChange={field.onChange} options={[{ value: "A4", label: "A4" }, { value: "LETTER", label: "Letter" }]} />
+                <SelectField
+                  id="paper"
+                  value={field.value}
+                  onChange={field.onChange}
+                  options={[
+                    { value: "A4", label: "A4" },
+                    { value: "LETTER", label: "Letter" },
+                  ]}
+                />
               )}
             />
           </Field>
@@ -118,16 +168,40 @@ export function BusinessSettings() {
             <Controller
               control={form.control}
               name="defaultTemplateId"
-              render={({ field }) => <SelectField id="template" value={field.value} onChange={field.onChange} options={templates} />}
+              render={({ field }) => (
+                <SelectField
+                  id="template"
+                  value={field.value}
+                  onChange={field.onChange}
+                  options={templates}
+                />
+              )}
             />
           </Field>
-          <Field label="Default due days" htmlFor="dueDays" error={errors.defaultDueDays?.message}>
-            <Input id="dueDays" inputMode="numeric" {...form.register("defaultDueDays")} />
+          <Field
+            label="Default due days"
+            htmlFor="dueDays"
+            error={errors.defaultDueDays?.message}
+          >
+            <Input
+              id="dueDays"
+              inputMode="numeric"
+              {...form.register("defaultDueDays")}
+            />
           </Field>
-          <Field label="Default payment terms" htmlFor="terms" className="sm:col-span-2">
+          <Field
+            label="Default payment terms"
+            htmlFor="terms"
+            className="sm:col-span-2"
+          >
             <Input id="terms" {...form.register("defaultPaymentTerms")} />
           </Field>
-          <Field label="Default notes" htmlFor="notes" className="sm:col-span-2" hint="Printed on new invoices. Leave empty for none.">
+          <Field
+            label="Default notes"
+            htmlFor="notes"
+            className="sm:col-span-2"
+            hint="Printed on new invoices. Leave empty for none."
+          >
             <Textarea id="notes" rows={3} {...form.register("defaultNotes")} />
           </Field>
         </CardContent>

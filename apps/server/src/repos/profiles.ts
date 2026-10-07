@@ -12,7 +12,10 @@ export const profilesRepo = (db: DbLike) => ({
       .select()
       .from(issuerProfiles)
       .where(
-        and(eq(issuerProfiles.workspaceId, ws), includeArchived ? undefined : isNull(issuerProfiles.archivedAt))
+        and(
+          eq(issuerProfiles.workspaceId, ws),
+          includeArchived ? undefined : isNull(issuerProfiles.archivedAt)
+        )
       )
       .orderBy(asc(issuerProfiles.displayName))
       .all()
@@ -26,7 +29,13 @@ export const profilesRepo = (db: DbLike) => ({
       .get(),
 
   create(ws: string, input: IssuerProfileInput): IssuerProfileRow {
-    const row = { id: newId(), workspaceId: ws, ...input, logoFile: null, archivedAt: null }
+    const row = {
+      id: newId(),
+      workspaceId: ws,
+      ...input,
+      logoFile: null,
+      archivedAt: null,
+    }
     db.insert(issuerProfiles).values(row).run()
     return row
   },
@@ -40,7 +49,10 @@ export const profilesRepo = (db: DbLike) => ({
 
   /** Make exactly one profile the default. */
   setDefault(ws: string, id: string): void {
-    db.update(issuerProfiles).set({ isDefault: false }).where(eq(issuerProfiles.workspaceId, ws)).run()
+    db.update(issuerProfiles)
+      .set({ isDefault: false })
+      .where(eq(issuerProfiles.workspaceId, ws))
+      .run()
     db.update(issuerProfiles)
       .set({ isDefault: true })
       .where(and(eq(issuerProfiles.workspaceId, ws), eq(issuerProfiles.id, id)))
@@ -68,7 +80,10 @@ export const paymentAccountsRepo = (db: DbLike) => ({
       .select()
       .from(paymentAccounts)
       .where(
-        and(eq(paymentAccounts.workspaceId, ws), includeArchived ? undefined : isNull(paymentAccounts.archivedAt))
+        and(
+          eq(paymentAccounts.workspaceId, ws),
+          includeArchived ? undefined : isNull(paymentAccounts.archivedAt)
+        )
       )
       .orderBy(asc(paymentAccounts.label))
       .all()
@@ -78,7 +93,9 @@ export const paymentAccountsRepo = (db: DbLike) => ({
     db
       .select()
       .from(paymentAccounts)
-      .where(and(eq(paymentAccounts.workspaceId, ws), eq(paymentAccounts.id, id)))
+      .where(
+        and(eq(paymentAccounts.workspaceId, ws), eq(paymentAccounts.id, id))
+      )
       .get(),
 
   create(ws: string, input: PaymentAccountInput): PaymentAccountRow {
@@ -90,14 +107,18 @@ export const paymentAccountsRepo = (db: DbLike) => ({
   update(ws: string, id: string, input: PaymentAccountInput): void {
     db.update(paymentAccounts)
       .set(input)
-      .where(and(eq(paymentAccounts.workspaceId, ws), eq(paymentAccounts.id, id)))
+      .where(
+        and(eq(paymentAccounts.workspaceId, ws), eq(paymentAccounts.id, id))
+      )
       .run()
   },
 
   setArchived(ws: string, id: string, archivedAt: string | null): void {
     db.update(paymentAccounts)
       .set({ archivedAt })
-      .where(and(eq(paymentAccounts.workspaceId, ws), eq(paymentAccounts.id, id)))
+      .where(
+        and(eq(paymentAccounts.workspaceId, ws), eq(paymentAccounts.id, id))
+      )
       .run()
   },
 })

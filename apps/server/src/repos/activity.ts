@@ -33,9 +33,18 @@ export const activityRepo = (db: DbLike) => ({
   },
 
   /** Newest first. The cursor is "<at>|<id>" of the last row of the previous page. */
-  page(ws: string, cursor: string | null): { rows: ActivityRow[]; next: string | null } {
+  page(
+    ws: string,
+    cursor: string | null
+  ): { rows: ActivityRow[]; next: string | null } {
     const [at, id] = cursor?.split("|") ?? []
-    const after = at && id ? or(lt(activityLog.at, at), and(eq(activityLog.at, at), lt(activityLog.id, id))) : undefined
+    const after =
+      at && id
+        ? or(
+            lt(activityLog.at, at),
+            and(eq(activityLog.at, at), lt(activityLog.id, id))
+          )
+        : undefined
     const rows = db
       .select()
       .from(activityLog)
@@ -46,6 +55,9 @@ export const activityRepo = (db: DbLike) => ({
     const hasMore = rows.length > PAGE_SIZE
     const slice = rows.slice(0, PAGE_SIZE)
     const last = slice[slice.length - 1]
-    return { rows: slice, next: hasMore && last ? `${last.at}|${last.id}` : null }
+    return {
+      rows: slice,
+      next: hasMore && last ? `${last.at}|${last.id}` : null,
+    }
   },
 })

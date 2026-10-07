@@ -4,13 +4,19 @@ import { child, doc, item } from "./test-helpers"
 
 describe("invoiceDocSchema", () => {
   it("accepts a valid doc", () => {
-    expect(invoiceDocSchema.safeParse(doc({ items: [item({ description: "Work" })] })).success).toBe(true)
+    expect(
+      invoiceDocSchema.safeParse(
+        doc({ items: [item({ description: "Work" })] })
+      ).success
+    ).toBe(true)
   })
   it("requires at least one item", () => {
     expect(invoiceDocSchema.safeParse(doc({ items: [] })).success).toBe(false)
   })
   it("rejects explicit without rate", () => {
-    expect(itemSchema.safeParse(item({ description: "x", rate: null })).success).toBe(false)
+    expect(
+      itemSchema.safeParse(item({ description: "x", rate: null })).success
+    ).toBe(false)
   })
   it("rejects rollup child with qty but no rate", () => {
     const bad = item({
@@ -31,7 +37,10 @@ describe("invoiceDocSchema", () => {
   it("limits children to 20 and one level", () => {
     const many = Array.from({ length: 21 }, () => child())
     expect(itemSchema.safeParse(item({ children: many })).success).toBe(false)
-    const nested = { ...item(), children: [{ ...child(), children: [child()] }] }
+    const nested = {
+      ...item(),
+      children: [{ ...child(), children: [child()] }],
+    }
     const parsed = itemSchema.parse(nested)
     expect(parsed.children[0]).not.toHaveProperty("children")
   })

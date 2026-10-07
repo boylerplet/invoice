@@ -1,5 +1,9 @@
 import type { AgingBucket } from "./lifecycle"
-import type { ClientInput, IssuerProfileInput, PaymentAccountInput } from "./master"
+import type {
+  ClientInput,
+  IssuerProfileInput,
+  PaymentAccountInput,
+} from "./master"
 import type { CurrencyCode } from "./currencies"
 import type { InvoiceDoc, InvoiceStatus } from "./schema"
 import type { WorkspaceSettings } from "./workspace"
@@ -117,8 +121,16 @@ export interface CurrencyDashboardDto {
   paidThisYearMinor: number
   draftsCount: number
   aging: AgingBucketsDto
-  agingByClient: { clientId: string; clientName: string; buckets: AgingBucketsDto }[]
-  topClients: { clientId: string; clientName: string; outstandingMinor: number }[]
+  agingByClient: {
+    clientId: string
+    clientName: string
+    buckets: AgingBucketsDto
+  }[]
+  topClients: {
+    clientId: string
+    clientName: string
+    outstandingMinor: number
+  }[]
 }
 
 export interface DashboardDto {

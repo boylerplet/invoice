@@ -13,7 +13,10 @@ describe("auth", () => {
     await addUser(env, "Demo", "Demo Studio")
     const api = new Client(env)
     expect((await api.login("demo")).status).toBe(200)
-    const me = await api.json<{ user: { username: string }; workspace: { name: string } }>("GET", "/auth/me")
+    const me = await api.json<{
+      user: { username: string }
+      workspace: { name: string }
+    }>("GET", "/auth/me")
     expect(me.status).toBe(200)
     expect(me.body.user.username).toBe("demo")
     expect(me.body.workspace.name).toBe("Demo Studio")
@@ -42,7 +45,8 @@ describe("auth", () => {
     const env = makeEnv()
     await addUser(env, "demo", "Demo")
     const api = new Client(env)
-    for (let i = 0; i < 5; i++) expect((await api.login("demo", "bad")).status).toBe(401)
+    for (let i = 0; i < 5; i++)
+      expect((await api.login("demo", "bad")).status).toBe(401)
     expect((await api.login("demo", "bad")).status).toBe(429)
     expect((await api.login("demo")).status).toBe(429)
   })
@@ -65,12 +69,22 @@ describe("auth", () => {
     await addUser(env, "demo", "Demo")
     const api = new Client(env)
     await api.login("demo")
-    const bad = await api.json("POST", "/auth/change-password", { currentPassword: "nope", newPassword: "newpassword1" })
+    const bad = await api.json("POST", "/auth/change-password", {
+      currentPassword: "nope",
+      newPassword: "newpassword1",
+    })
     expect(bad.status).toBe(422)
-    const ok = await api.json("POST", "/auth/change-password", { currentPassword: "password123", newPassword: "newpassword1" })
+    const ok = await api.json("POST", "/auth/change-password", {
+      currentPassword: "password123",
+      newPassword: "newpassword1",
+    })
     expect(ok.status).toBe(200)
-    expect((await new Client(env).login("demo", "password123")).status).toBe(401)
-    expect((await new Client(env).login("demo", "newpassword1")).status).toBe(200)
+    expect((await new Client(env).login("demo", "password123")).status).toBe(
+      401
+    )
+    expect((await new Client(env).login("demo", "newpassword1")).status).toBe(
+      200
+    )
   })
 
   it("blocks cross-origin mutating requests", async () => {
@@ -90,7 +104,16 @@ describe("auth", () => {
     const first = await addUser(env, "a", "Shared")
     const second = await (async () => {
       const { createUser } = await import("./services/users")
-      return createUser(env.db, { username: "b", password: "password123", workspaceId: first.workspace.id, timezone: "Asia/Kolkata" }, env.clock.now)
+      return createUser(
+        env.db,
+        {
+          username: "b",
+          password: "password123",
+          workspaceId: first.workspace.id,
+          timezone: "Asia/Kolkata",
+        },
+        env.clock.now
+      )
     })()
     expect(second.workspace.id).toBe(first.workspace.id)
     await expect(addUser(env, "a", "Other")).rejects.toThrow(/already exists/)

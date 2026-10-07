@@ -1,4 +1,10 @@
-import type { Adjustment, Child, InvoiceDoc, Item, PaymentSnapshot } from "@workspace/shared"
+import type {
+  Adjustment,
+  Child,
+  InvoiceDoc,
+  Item,
+  PaymentSnapshot,
+} from "@workspace/shared"
 
 /** Inline SVG so fixtures never touch the network or the uploads folder. */
 export const FIXTURE_LOGO_URL = `data:image/svg+xml;utf8,${encodeURIComponent(
@@ -15,7 +21,10 @@ export interface Ids {
   next: () => string
 }
 
-export function item(ids: Ids, over: Partial<Item> & Pick<Item, "description">): Item {
+export function item(
+  ids: Ids,
+  over: Partial<Item> & Pick<Item, "description">
+): Item {
   return {
     id: ids.next(),
     detail: null,
@@ -28,12 +37,24 @@ export function item(ids: Ids, over: Partial<Item> & Pick<Item, "description">):
   }
 }
 
-export function child(ids: Ids, over: Partial<Child> & Pick<Child, "description">): Child {
+export function child(
+  ids: Ids,
+  over: Partial<Child> & Pick<Child, "description">
+): Child {
   return { id: ids.next(), qty: null, unit: null, rate: null, ...over }
 }
 
-export function adjustment(ids: Ids, over: Partial<Adjustment> & Pick<Adjustment, "label">): Adjustment {
-  return { id: ids.next(), kind: "discount", valueType: "fixed", value: "0", ...over }
+export function adjustment(
+  ids: Ids,
+  over: Partial<Adjustment> & Pick<Adjustment, "label">
+): Adjustment {
+  return {
+    id: ids.next(),
+    kind: "discount",
+    valueType: "fixed",
+    value: "0",
+    ...over,
+  }
 }
 
 export const PAYMENT: PaymentSnapshot = {
@@ -73,7 +94,10 @@ export function baseDoc(over: Partial<InvoiceDoc> = {}): InvoiceDoc {
       profileId: "fx-profile",
       displayName: "Menon Design Co.",
       legalName: "Menon Design Company LLP",
-      addressLines: ["14, 3rd Cross, Indiranagar", "Bengaluru 560038, Karnataka"],
+      addressLines: [
+        "14, 3rd Cross, Indiranagar",
+        "Bengaluru 560038, Karnataka",
+      ],
       email: "hello@menondesign.example",
       phone: "+91 98450 00000",
       website: null,
@@ -84,7 +108,10 @@ export function baseDoc(over: Partial<InvoiceDoc> = {}): InvoiceDoc {
       clientId: "fx-client",
       name: "Kaveri Automation Pvt Ltd",
       contactPerson: "Ananya Rao",
-      addressLines: ["Plot 22, Peenya Industrial Area", "Bengaluru 560058, Karnataka"],
+      addressLines: [
+        "Plot 22, Peenya Industrial Area",
+        "Bengaluru 560058, Karnataka",
+      ],
       email: "accounts@kaveri.example",
       phone: "+91 80 4000 0000",
       taxIds: [{ label: "GSTIN", value: "29AAACK5678M1Z2" }],

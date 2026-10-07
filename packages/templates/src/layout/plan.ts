@@ -1,4 +1,9 @@
-import type { InvoiceVM, PagePlan, PaperSize, TemplateModule } from "../contract"
+import type {
+  InvoiceVM,
+  PagePlan,
+  PaperSize,
+  TemplateModule,
+} from "../contract"
 import { paginate, type PaginateInput } from "../paginate"
 import { contentHeightPx, type Measurements } from "./measure"
 import { buildUnits } from "./units"
@@ -21,10 +26,20 @@ export function planPages(
     headerHeight: { first: m.headerFirst, continuation: m.headerContinuation },
     introHeight: m.intro,
     tableHeadHeight: m.tableHead,
-    units: sizes.map((u) => ({ id: u.id, groupId: u.groupId, height: u.height, kind: u.kind, isFirstInGroup: u.isFirstInGroup })),
+    units: sizes.map((u) => ({
+      id: u.id,
+      groupId: u.groupId,
+      height: u.height,
+      kind: u.kind,
+      isFirstInGroup: u.isFirstInGroup,
+    })),
     continuedHeight: m.continued,
     terminalHeight: m.terminal,
-    options: { keepLastRowsWithTerminal: template.manifest.options.keepLastRowsWithTerminal, safety },
+    options: {
+      keepLastRowsWithTerminal:
+        template.manifest.options.keepLastRowsWithTerminal,
+      safety,
+    },
   }
   return paginate(input)
 }

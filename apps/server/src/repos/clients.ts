@@ -10,7 +10,12 @@ export const clientsRepo = (db: DbLike) => ({
     return db
       .select()
       .from(clients)
-      .where(and(eq(clients.workspaceId, ws), includeArchived ? undefined : isNull(clients.archivedAt)))
+      .where(
+        and(
+          eq(clients.workspaceId, ws),
+          includeArchived ? undefined : isNull(clients.archivedAt)
+        )
+      )
       .orderBy(asc(clients.name))
       .all()
   },

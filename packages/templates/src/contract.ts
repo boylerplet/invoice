@@ -1,5 +1,10 @@
 import type { FC } from "react"
-import type { InvoiceVM, RowGroupVM, RowVM, SupportFlags } from "@workspace/shared"
+import type {
+  InvoiceVM,
+  RowGroupVM,
+  RowVM,
+  SupportFlags,
+} from "@workspace/shared"
 
 export type { InvoiceVM, RowGroupVM, RowVM }
 export type PaperSize = "A4" | "LETTER"
@@ -132,6 +137,8 @@ export interface PagePlan {
   hasTerminal: boolean
 }
 
-export function templateKey(manifest: Pick<TemplateManifest, "id" | "version">): string {
+export function templateKey(
+  manifest: Pick<TemplateManifest, "id" | "version">
+): string {
   return `tpl-${manifest.id}-v${manifest.version}`
 }

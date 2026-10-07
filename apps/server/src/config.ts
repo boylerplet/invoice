@@ -36,9 +36,13 @@ function loadSecrets(dataDir: string): Secrets {
     : {}
   const secrets: Secrets = {
     sessionSecret:
-      process.env.SESSION_SECRET || stored.sessionSecret || randomBytes(32).toString("hex"),
+      process.env.SESSION_SECRET ||
+      stored.sessionSecret ||
+      randomBytes(32).toString("hex"),
     printSecret:
-      process.env.PRINT_SECRET || stored.printSecret || randomBytes(32).toString("hex"),
+      process.env.PRINT_SECRET ||
+      stored.printSecret ||
+      randomBytes(32).toString("hex"),
   }
   if (!existsSync(file)) writeFileSync(file, JSON.stringify(secrets, null, 2))
   return secrets
@@ -70,7 +74,9 @@ export function loadConfig(): Config {
     webDist,
     printBaseUrl:
       process.env.PRINT_BASE_URL ||
-      (existsSync(join(webDist, "index.html")) ? `http://127.0.0.1:${port}` : `http://localhost:${webPort}`),
+      (existsSync(join(webDist, "index.html"))
+        ? `http://127.0.0.1:${port}`
+        : `http://localhost:${webPort}`),
     allowedOrigins:
       process.env.NODE_ENV === "production"
         ? []

@@ -46,3 +46,9 @@ One line per decision: what + why. Newest at the bottom.
 - PDF export uses one warm `puppeteer-core` browser (Edge/Chrome/Chromium auto-detected, or PUPPETEER_EXECUTABLE_PATH), one page per request, closed on SIGINT/SIGTERM. A missing browser returns a 503 with install guidance and logs a warning at startup.
 - Exporting a draft via "Export & mark as issued" issues first (strict validation applies); exporting an issued/paid/cancelled invoice never changes its status. Editor export is blocked while an ISSUED invoice has unsaved edits (the PDF is made from saved data).
 - PDF/preview parity is asserted per page in Playwright: same page count, correct page size, and identical text per page (pdfjs text vs the preview DOM). `scripts/qa-pdf.ts` + `scripts/pdf-to-png.ts` render a PDF to PNGs for a visual check.
+- Seed data goes through the real services with a controllable clock (dates relative to today), so numbers, revisions, activity and totals are produced exactly as in normal use; the seed refuses to run when data exists unless `--force`.
+- The seeded 14 invoices: paid x3, cancelled x1, draft x1 (plus one discarded draft in the Trash), issued x8 (two overdue, one due today, one with three revisions, one USD on Letter), including a 42-item three-page invoice and invoices covering all three pricing modes.
+- Accessibility pass uses axe in Playwright (serious and critical WCAG A/AA must be zero) on login, dashboard, invoices, clients, activity, key settings pages and the editor; selects without a visible label get an `aria-label`.
+- Unknown URLs show a "Page not found" screen instead of silently redirecting; a route error boundary replaces blank pages on crashes.
+- `pnpm format` runs Prettier over code (not over docs written by the user). The web `typecheck` script uses `tsc -p tsconfig.app.json` because the root tsconfig only holds references.
+- The web app is a single JS chunk (about 1.1 MB); code splitting is left as optional polish.

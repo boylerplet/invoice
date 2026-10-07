@@ -23,9 +23,11 @@ const emptyBuckets = (): Buckets => ({
   "61+": { amountMinor: 0, count: 0 },
 })
 
-
 /** Start of the reporting year: the financial year when numbering is financial, else calendar. */
-export function yearStartFor(numbering: NumberingSettings, today: string): string {
+export function yearStartFor(
+  numbering: NumberingSettings,
+  today: string
+): string {
   const [y, m] = today.split("-").map(Number)
   const year = y ?? 1970
   const month = m ?? 1
@@ -46,7 +48,10 @@ export function createStatsService(deps: Deps) {
           byCurrency: {},
         }
         summary.invoiceCount += 1
-        if (!summary.lastInvoiceDate || row.issueDate > summary.lastInvoiceDate) {
+        if (
+          !summary.lastInvoiceDate ||
+          row.issueDate > summary.lastInvoiceDate
+        ) {
           summary.lastInvoiceDate = row.issueDate
         }
         if (row.status === "ISSUED" || row.status === "PAID") {
@@ -82,8 +87,14 @@ export function createStatsService(deps: Deps) {
       const yearStart = yearStartFor(workspace.settings.numbering, today)
       const rows = invoicesRepo(deps.db).listLive(ws)
       const byCurrency = new Map<CurrencyCode, CurrencyDashboardDto>()
-      const clientBuckets = new Map<string, Map<string, { name: string; buckets: Buckets }>>()
-      const outstandingByClient = new Map<string, Map<string, { name: string; amount: number }>>()
+      const clientBuckets = new Map<
+        string,
+        Map<string, { name: string; buckets: Buckets }>
+      >()
+      const outstandingByClient = new Map<
+        string,
+        Map<string, { name: string; amount: number }>
+      >()
 
       const slot = (currency: CurrencyCode): CurrencyDashboardDto => {
         let entry = byCurrency.get(currency)
@@ -109,8 +120,10 @@ export function createStatsService(deps: Deps) {
         const entry = slot(row.currency)
         if (row.status === "DRAFT") entry.draftsCount += 1
         if (row.status === "PAID" && row.paidAt) {
-          if (row.paidAt.slice(0, 7) === today.slice(0, 7)) entry.paidThisMonthMinor += row.totalMinor
-          if (row.paidAt >= yearStart && row.paidAt <= today) entry.paidThisYearMinor += row.totalMinor
+          if (row.paidAt.slice(0, 7) === today.slice(0, 7))
+            entry.paidThisMonthMinor += row.totalMinor
+          if (row.paidAt >= yearStart && row.paidAt <= today)
+            entry.paidThisYearMinor += row.totalMinor
         }
         const bucket = agingBucket(row, today)
         if (bucket === null) continue
@@ -122,13 +135,19 @@ export function createStatsService(deps: Deps) {
           entry.overdueCount += 1
         }
         const perClient = clientBuckets.get(row.currency) ?? new Map()
-        const cb = perClient.get(row.clientId) ?? { name: row.clientName, buckets: emptyBuckets() }
+        const cb = perClient.get(row.clientId) ?? {
+          name: row.clientName,
+          buckets: emptyBuckets(),
+        }
         cb.buckets[bucket].amountMinor += row.totalMinor
         cb.buckets[bucket].count += 1
         perClient.set(row.clientId, cb)
         clientBuckets.set(row.currency, perClient)
         const outstanding = outstandingByClient.get(row.currency) ?? new Map()
-        const prior = outstanding.get(row.clientId) ?? { name: row.clientName, amount: 0 }
+        const prior = outstanding.get(row.clientId) ?? {
+          name: row.clientName,
+          amount: 0,
+        }
         prior.amount += row.totalMinor
         outstanding.set(row.clientId, prior)
         outstandingByClient.set(row.currency, outstanding)
@@ -136,10 +155,18 @@ export function createStatsService(deps: Deps) {
 
       for (const [currency, entry] of byCurrency) {
         entry.agingByClient = [...(clientBuckets.get(currency) ?? [])]
-          .map(([clientId, v]) => ({ clientId, clientName: v.name, buckets: v.buckets }))
+          .map(([clientId, v]) => ({
+            clientId,
+            clientName: v.name,
+            buckets: v.buckets,
+          }))
           .sort((a, b) => a.clientName.localeCompare(b.clientName))
         entry.topClients = [...(outstandingByClient.get(currency) ?? [])]
-          .map(([clientId, v]) => ({ clientId, clientName: v.name, outstandingMinor: v.amount }))
+          .map(([clientId, v]) => ({
+            clientId,
+            clientName: v.name,
+            outstandingMinor: v.amount,
+          }))
           .sort((a, b) => b.outstandingMinor - a.outstandingMinor)
           .slice(0, 5)
       }
@@ -152,7 +179,9 @@ export function createStatsService(deps: Deps) {
         today,
         yearStart,
         yearLabel: financial ? "this financial year" : "this year",
-        currencies: [...byCurrency.values()].sort((a, b) => a.currency.localeCompare(b.currency)),
+        currencies: [...byCurrency.values()].sort((a, b) =>
+          a.currency.localeCompare(b.currency)
+        ),
         recent,
       }
     },

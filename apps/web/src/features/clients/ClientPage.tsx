@@ -20,7 +20,9 @@ import { ClientForm } from "./ClientForm"
 function Stat({ label, value }: { label: string; value: string }) {
   return (
     <div>
-      <p className="text-muted-foreground text-xs uppercase tracking-wide">{label}</p>
+      <p className="text-xs tracking-wide text-muted-foreground uppercase">
+        {label}
+      </p>
       <p className="text-lg font-semibold tabular-nums">{value}</p>
     </div>
   )
@@ -37,20 +39,43 @@ export function ClientPage() {
   const client = clients.data?.find((c) => c.id === id)
 
   if (clients.isPending) return <Skeleton className="m-6 h-64" />
-  if (!client) return <div className="p-6"><EmptyState title="Client not found" action={<Link className="text-primary text-sm underline" to="/clients">Back to clients</Link>} /></div>
-  const byCurrency = CURRENCY_CODES.flatMap((code) => (client.summary?.byCurrency[code] ? [{ code, totals: client.summary.byCurrency[code] }] : []))
+  if (!client)
+    return (
+      <div className="p-6">
+        <EmptyState
+          title="Client not found"
+          action={
+            <Link className="text-sm text-primary underline" to="/clients">
+              Back to clients
+            </Link>
+          }
+        />
+      </div>
+    )
+  const byCurrency = CURRENCY_CODES.flatMap((code) =>
+    client.summary?.byCurrency[code]
+      ? [{ code, totals: client.summary.byCurrency[code] }]
+      : []
+  )
 
   return (
     <div className="mx-auto w-full max-w-6xl space-y-5 p-4 md:p-6">
       <PageHeader
         title={client.name}
-        description={[client.contactPerson, client.email, client.phone].filter(Boolean).join(" · ") || undefined}
+        description={
+          [client.contactPerson, client.email, client.phone]
+            .filter(Boolean)
+            .join(" · ") || undefined
+        }
         actions={
           <>
             <Button variant="outline" onClick={() => setEditing(true)}>
               <Icon icon={PencilEdit02Icon} /> Edit
             </Button>
-            <Button render={<Link to={`/invoices/new?clientId=${client.id}`} />} nativeButton={false}>
+            <Button
+              render={<Link to={`/invoices/new?clientId=${client.id}`} />}
+              nativeButton={false}
+            >
               <Icon icon={Add01Icon} /> New invoice for this client
             </Button>
           </>
@@ -64,18 +89,35 @@ export function ClientPage() {
             ))}
             {client.taxIds.map((tax, i) => (
               <p key={i}>
-                <span className="text-muted-foreground">{tax.label}</span> {tax.value}
+                <span className="text-muted-foreground">{tax.label}</span>{" "}
+                {tax.value}
               </p>
             ))}
-            {client.notes && <p className="text-muted-foreground pt-2">{client.notes}</p>}
+            {client.notes && (
+              <p className="pt-2 text-muted-foreground">{client.notes}</p>
+            )}
           </div>
           <div className="space-y-4">
-            {byCurrency.length === 0 && <p className="text-muted-foreground text-sm">No issued invoices yet.</p>}
+            {byCurrency.length === 0 && (
+              <p className="text-sm text-muted-foreground">
+                No issued invoices yet.
+              </p>
+            )}
             {byCurrency.map(({ code, totals }) => (
-              <div key={code} className="grid grid-cols-3 gap-3" data-testid={`summary-${code}`}>
-                <Stat label={`Billed ${code}`} value={money(totals.billedMinor, code)} />
+              <div
+                key={code}
+                className="grid grid-cols-3 gap-3"
+                data-testid={`summary-${code}`}
+              >
+                <Stat
+                  label={`Billed ${code}`}
+                  value={money(totals.billedMinor, code)}
+                />
                 <Stat label="Paid" value={money(totals.paidMinor, code)} />
-                <Stat label="Outstanding" value={money(totals.outstandingMinor, code)} />
+                <Stat
+                  label="Outstanding"
+                  value={money(totals.outstandingMinor, code)}
+                />
               </div>
             ))}
           </div>
@@ -85,13 +127,26 @@ export function ClientPage() {
       {list.isPending ? (
         <Skeleton className="h-40 w-full" />
       ) : (list.data?.rows.length ?? 0) === 0 ? (
-        <EmptyState title={params.hasFilters ? "No invoices match these filters" : "No invoices for this client yet"} />
+        <EmptyState
+          title={
+            params.hasFilters
+              ? "No invoices match these filters"
+              : "No invoices for this client yet"
+          }
+        />
       ) : (
-        <InvoiceTable rows={list.data?.rows ?? []} group="month" hideClient onAction={onAction} />
+        <InvoiceTable
+          rows={list.data?.rows ?? []}
+          group="month"
+          hideClient
+          onAction={onAction}
+        />
       )}
       {dialogs}
       <EditSheet open={editing} onOpenChange={setEditing} title="Edit client">
-        {editing && <ClientForm client={client} onSaved={() => setEditing(false)} />}
+        {editing && (
+          <ClientForm client={client} onSaved={() => setEditing(false)} />
+        )}
       </EditSheet>
     </div>
   )

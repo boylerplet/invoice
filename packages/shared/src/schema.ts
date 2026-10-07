@@ -6,9 +6,14 @@ import { isMinor, isPercentString, isQtyString } from "./money"
 export const MAX_ITEMS = 200
 export const MAX_CHILDREN = 20
 
-const minor = z.number().refine(isMinor, "Must be a whole number of minor units").refine((n) => n >= 0, "Cannot be negative")
+const minor = z
+  .number()
+  .refine(isMinor, "Must be a whole number of minor units")
+  .refine((n) => n >= 0, "Cannot be negative")
 const qty = z.string().refine(isQtyString, "Up to 3 decimals")
-const percent = z.string().refine(isPercentString, "Enter a percentage from 0 to 100")
+const percent = z
+  .string()
+  .refine(isPercentString, "Enter a percentage from 0 to 100")
 const isoDate = z.string().refine(isValidIsoDate, "Use YYYY-MM-DD")
 const text = (max: number) => z.string().max(max)
 const optText = (max: number) => z.string().max(max).nullable()
@@ -70,15 +75,27 @@ export const itemShape = z.object({
 /** Rules that must hold before an invoice can be issued or saved as ISSUED. */
 export const itemSchema = itemShape.superRefine((item, ctx) => {
   if (item.description.trim() === "") {
-    ctx.addIssue({ code: "custom", path: ["description"], message: "Describe this item" })
+    ctx.addIssue({
+      code: "custom",
+      path: ["description"],
+      message: "Describe this item",
+    })
   }
   if (item.pricing === "explicit" && item.rate === null) {
-    ctx.addIssue({ code: "custom", path: ["rate"], message: "Rate is required for a fixed amount" })
+    ctx.addIssue({
+      code: "custom",
+      path: ["rate"],
+      message: "Rate is required for a fixed amount",
+    })
   }
   if (item.pricing === "rollup") {
     item.children.forEach((child, i) => {
       if (child.qty !== null && child.rate === null) {
-        ctx.addIssue({ code: "custom", path: ["children", i, "rate"], message: "A quantity needs a rate" })
+        ctx.addIssue({
+          code: "custom",
+          path: ["children", i, "rate"],
+          message: "A quantity needs a rate",
+        })
       }
     })
   }
@@ -93,15 +110,27 @@ export const adjustmentSchema = z
     value: z.string(),
   })
   .superRefine((adj, ctx) => {
-    const ok = adj.valueType === "fixed" ? /^[0-9]{1,15}$/.test(adj.value) : isPercentString(adj.value)
-    if (!ok) ctx.addIssue({ code: "custom", path: ["value"], message: "Invalid value" })
+    const ok =
+      adj.valueType === "fixed"
+        ? /^[0-9]{1,15}$/.test(adj.value)
+        : isPercentString(adj.value)
+    if (!ok)
+      ctx.addIssue({
+        code: "custom",
+        path: ["value"],
+        message: "Invalid value",
+      })
   })
 
 function docShape<T extends z.ZodType>(items: T) {
   return z.object({
     schemaVersion: z.literal(1),
     type: z.literal("INVOICE"),
-    number: z.string().min(1).max(32).regex(/^[A-Za-z0-9/_-]+$/, "Letters, digits, / _ - only"),
+    number: z
+      .string()
+      .min(1)
+      .max(32)
+      .regex(/^[A-Za-z0-9/_-]+$/, "Letters, digits, / _ - only"),
     issueDate: isoDate,
     dueDate: isoDate.nullable(),
     currency: currencySchema,

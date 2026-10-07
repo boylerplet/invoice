@@ -11,12 +11,15 @@ import { setUnauthorizedHandler } from "@/lib/api"
 import { router } from "@/router"
 
 const queryClient = new QueryClient({
-  defaultOptions: { queries: { staleTime: 15_000, refetchOnWindowFocus: false, retry: 1 } },
+  defaultOptions: {
+    queries: { staleTime: 15_000, refetchOnWindowFocus: false, retry: 1 },
+  },
 })
 
 setUnauthorizedHandler(() => {
   queryClient.clear()
-  if (!window.location.pathname.startsWith("/login")) void router.navigate("/login", { replace: true })
+  if (!window.location.pathname.startsWith("/login"))
+    void router.navigate("/login", { replace: true })
 })
 
 createRoot(document.getElementById("root")!).render(

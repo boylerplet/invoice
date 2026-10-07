@@ -30,7 +30,8 @@ export function useInvoiceSaver(invoiceId: string, autosave: boolean) {
         useEditorStore.getState().saved(rev, new Date().toISOString())
         return true
       } catch (error) {
-        const message = error instanceof ApiError ? error.message : "Could not save"
+        const message =
+          error instanceof ApiError ? error.message : "Could not save"
         useEditorStore.getState().failed(message)
         toast.error(message)
         return false

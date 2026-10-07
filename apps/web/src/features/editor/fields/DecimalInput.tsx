@@ -16,7 +16,10 @@ interface DecimalInputProps {
 }
 
 /** Typed value -> stored value: null when empty, undefined while the text is not (yet) valid. */
-function interpret(text: string, kind: DecimalInputProps["kind"]): string | null | undefined {
+function interpret(
+  text: string,
+  kind: DecimalInputProps["kind"]
+): string | null | undefined {
   const trimmed = text.trim()
   if (trimmed === "") return null
   const valid = kind === "qty" ? isQtyString(trimmed) : isPercentString(trimmed)
@@ -24,7 +27,13 @@ function interpret(text: string, kind: DecimalInputProps["kind"]): string | null
 }
 
 /** A decimal kept as a string (never a float). Optional values store null when the field is empty. */
-export function DecimalInput({ value, onChange, kind, invalid, ...rest }: DecimalInputProps) {
+export function DecimalInput({
+  value,
+  onChange,
+  kind,
+  invalid,
+  ...rest
+}: DecimalInputProps) {
   const [text, setText] = useState(value ?? "")
   const current = interpret(text, kind)
   if (current !== undefined && current !== value) setText(value ?? "")

@@ -1,9 +1,19 @@
 import { useQuery } from "@tanstack/react-query"
-import { numberingSettingsSchema, type NextNumberDto, type NumberingSettings as Numbering } from "@workspace/shared"
+import {
+  numberingSettingsSchema,
+  type NextNumberDto,
+  type NumberingSettings as Numbering,
+} from "@workspace/shared"
 import { Controller, useForm, useWatch } from "react-hook-form"
 import { toast } from "sonner"
 import { Button } from "@workspace/ui/components/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@workspace/ui/components/card"
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@workspace/ui/components/card"
 import { Input } from "@workspace/ui/components/input"
 import { Switch } from "@workspace/ui/components/switch"
 import { Field } from "@/components/form/Field"
@@ -23,7 +33,20 @@ interface Values {
   resetEachPeriod: boolean
 }
 
-const MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]
+const MONTHS = [
+  "January",
+  "February",
+  "March",
+  "April",
+  "May",
+  "June",
+  "July",
+  "August",
+  "September",
+  "October",
+  "November",
+  "December",
+]
 
 const toNumbering = (v: Values): Numbering => ({
   prefix: v.prefix.trim(),
@@ -49,11 +72,16 @@ export function NumberingSettings() {
     resolver: payloadResolver(numberingSettingsSchema, toNumbering),
   })
   const values = useWatch({ control: form.control })
-  const candidate = numberingSettingsSchema.safeParse(toNumbering(values as Values))
+  const candidate = numberingSettingsSchema.safeParse(
+    toNumbering(values as Values)
+  )
   const preview = useQuery({
     queryKey: ["next-number", candidate.success ? candidate.data : null],
     enabled: candidate.success,
-    queryFn: () => api.post<NextNumberDto>("/invoices/next-number-preview", { numbering: candidate.data }),
+    queryFn: () =>
+      api.post<NextNumberDto>("/invoices/next-number-preview", {
+        numbering: candidate.data,
+      }),
     placeholderData: (previous) => previous,
   })
   if (!workspace) return null
@@ -77,17 +105,28 @@ export function NumberingSettings() {
       <Card>
         <CardHeader>
           <CardTitle>Invoice numbering</CardTitle>
-          <CardDescription>Numbers are never reused, even for discarded or cancelled invoices.</CardDescription>
+          <CardDescription>
+            Numbers are never reused, even for discarded or cancelled invoices.
+          </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
-          <div className="bg-muted rounded-lg p-4">
-            <p className="text-muted-foreground text-xs uppercase tracking-wide">Next number</p>
-            <p className="text-2xl font-semibold tabular-nums" data-testid="number-preview">
+          <div className="rounded-lg bg-muted p-4">
+            <p className="text-xs tracking-wide text-muted-foreground uppercase">
+              Next number
+            </p>
+            <p
+              className="text-2xl font-semibold tabular-nums"
+              data-testid="number-preview"
+            >
               {preview.data?.number ?? "-"}
             </p>
           </div>
           <div className="grid gap-4 sm:grid-cols-2">
-            <Field label="Prefix" htmlFor="prefix" error={errors.prefix?.message}>
+            <Field
+              label="Prefix"
+              htmlFor="prefix"
+              error={errors.prefix?.message}
+            >
               <Input id="prefix" {...form.register("prefix")} />
             </Field>
             <Field label="Separator" htmlFor="separator">
@@ -133,16 +172,41 @@ export function NumberingSettings() {
                   control={form.control}
                   name="fyStartMonth"
                   render={({ field }) => (
-                    <SelectField id="fyStart" value={field.value} onChange={field.onChange} options={MONTHS.map((m, i) => ({ value: String(i + 1), label: m }))} />
+                    <SelectField
+                      id="fyStart"
+                      value={field.value}
+                      onChange={field.onChange}
+                      options={MONTHS.map((m, i) => ({
+                        value: String(i + 1),
+                        label: m,
+                      }))}
+                    />
                   )}
                 />
               </Field>
             )}
-            <Field label="Minimum digits" htmlFor="padding" error={errors.padding?.message} hint="Padding is a minimum width; longer numbers still print in full.">
-              <Input id="padding" inputMode="numeric" {...form.register("padding")} />
+            <Field
+              label="Minimum digits"
+              htmlFor="padding"
+              error={errors.padding?.message}
+              hint="Padding is a minimum width; longer numbers still print in full."
+            >
+              <Input
+                id="padding"
+                inputMode="numeric"
+                {...form.register("padding")}
+              />
             </Field>
-            <Field label="Start number" htmlFor="start" error={errors.startNumber?.message}>
-              <Input id="start" inputMode="numeric" {...form.register("startNumber")} />
+            <Field
+              label="Start number"
+              htmlFor="start"
+              error={errors.startNumber?.message}
+            >
+              <Input
+                id="start"
+                inputMode="numeric"
+                {...form.register("startNumber")}
+              />
             </Field>
           </div>
           {values.period !== "none" && (
@@ -150,7 +214,12 @@ export function NumberingSettings() {
               <Controller
                 control={form.control}
                 name="resetEachPeriod"
-                render={({ field }) => <Switch checked={field.value} onCheckedChange={field.onChange} />}
+                render={({ field }) => (
+                  <Switch
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
+                  />
+                )}
               />
               Restart the counter each period
             </label>

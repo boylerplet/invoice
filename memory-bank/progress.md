@@ -2,10 +2,12 @@
 
 Update this file at the end of every work chunk. Newest status first.
 
-## Current phase
-Phase 8 — Seed, polish, docs (next)
+## Current status
+
+**All 9 build phases (0 to 8) are complete and committed.** The app is feature complete for v0.0.1 per `docs/BUILD_PROMPT.md`. Remaining work is optional polish (see `next-steps.md`).
 
 ## Phase checklist
+
 - [x] 0 Scaffold
 - [x] 1 Shared domain
 - [x] 2 Server foundation
@@ -14,14 +16,31 @@ Phase 8 — Seed, polish, docs (next)
 - [x] 5 Editor
 - [x] 6 Lists, dashboard, activity
 - [x] 7 PDF
-- [ ] 8 Seed, polish, docs
+- [x] 8 Seed, polish, docs
+
+## What exists
+
+- Login, app shell, settings (business, issuer profiles + logos, payment accounts, numbering with live preview, templates gallery, account, data export), clients, client folder pages.
+- Invoice editor with split screen, autosave, issue/pay/cancel/reopen/duplicate/discard, revisions and history, zoom/fit/page indicator, PDF export.
+- Lists by date / by client / trash with URL-state filters, dashboard with aging and per-currency totals, activity log, Ctrl+K palette.
+- Template system with one template ("Studio" v1), 15 fixtures, conformance suite, font pipeline, screenshot tooling.
+- Demo seed (`pnpm db:seed`, user `demo` / `demo1234`), README, production build and server verified (including PDF in production mode).
+
+## Verification at the end of Phase 8
+
+- `pnpm typecheck`, `pnpm lint`, `pnpm test` green (shared 58, templates 53, server 49).
+- `pnpm test:e2e`: 38 Playwright tests green (conformance, master data, editor, lists, PDF parity, seed, accessibility).
+- `pnpm build` then `pnpm start` serves the SPA and API; PDF export works in production mode.
 
 ## Log
-- Toolchain verified: Node 24, pnpm 12.9.1, git. shadcn monorepo scaffolded (see docs/DECISIONS.md).
-- Phase 1 done: `packages/shared` has money/format/dates/schema/calculate/vm/numbering/lifecycle with 52 tests. InvoiceVM types live in shared (`vm.ts`) because templates depends on shared; templates' contract re-exports them. Row rate/amount strings have no currency symbol; only `vm.total` has it.
-- Phase 2 done: Hono API (auth, workspace, profiles+logo, payment accounts, clients, invoices+transitions+revisions, dashboard, activity, backup) with 35 server tests and a verified curl walkthrough. PDF route and /print data endpoint are NOT built yet (Phase 7). Seed is Phase 8. Server code map: `apps/server/src/{routes,services,repos,auth,db,cli}`; test helpers in `src/test-utils.ts`.
-- Phase 3 done: `packages/templates` has contract, paginator (21 tests), fonts pipeline (`pnpm fonts:add`, Inter installed), measure/plan/hook, `<InvoiceDocument>`, 15 fixtures, Template 01 "Studio" v1, `docs/TEMPLATE_CONTRACT.md`, `pnpm template:shots`, and a Playwright conformance suite (`pnpm exec playwright test conformance`; needs the dev server, starts it automatically). Web app currently only has dev routes (lab, fixture print, registry dump); the real app shell starts in Phase 4. Screenshots reviewed by eye: A4/Letter fixtures look right.
-- Phase 4 done: login + guard, app shell (shadcn sidebar), settings (business, issuer profiles + logo upload, payment accounts w/ presets, numbering w/ live preview, templates gallery, account, data export), clients list + create/edit/archive. Dashboard/Invoices/Activity/Client detail routes are placeholders (`Later` in router.tsx) until Phase 5/6. Forms: RHF + `payloadResolver` (validates with the shared zod schemas after converting form values to the API payload). E2E: `pnpm exec playwright test` (isolated server on 5174/3002 via `pnpm e2e:server`). QA screenshots: `MSYS_NO_PATHCONV=1 pnpm tsx scripts/qa-shots.ts /route ...` (needs `pnpm dev` + demo user). Kill stale servers with PowerShell `Get-Process node | Stop-Process -Force` if ports stick.
-- Phase 5 done: editor at `/invoices/:id` (resizable split, accordion form with dnd-kit items, autosave, issue/pay/cancel/reopen/duplicate/discard flows, revisions + `/invoices/:id/history`, preview zoom/fit/page indicator), `/invoices/new`. Status/pay/cancel dialogs live in `features/invoices/InvoiceDialogs.tsx` and mutation hooks in `lib/invoiceQueries.ts` (reuse them in the Phase 6 lists). E2E: `e2e/editor.spec.ts` (7 tests green). PDF export button is NOT in the editor yet (Phase 7). `/invoices` (list), `/` (dashboard), `/activity`, `/clients/:id` are still `Later` placeholders in `router.tsx`.
-- Phase 6 done: `/invoices` (By date with month groups / By client folders / Trash, URL-state filters, row actions), `/clients/:id` folder page, dashboard (per-currency cards, aging, top clients, recent), `/activity` (infinite), Ctrl+K palette. E2E: `e2e/lists.spec.ts` (uses a second user `lists` created via CLI for isolation). Row menu has NO "Download PDF" yet (Phase 7).
-- Phase 7 done: `/print/:id` (token), `GET /api/invoices/:id/pdf?issue=`, warm puppeteer-core browser, editor "Export PDF" (+ issue/no-issue dialog), list "Download PDF". Parity e2e (`e2e/pdf.spec.ts`) green for 4 fixtures × A4/Letter. Full suite: 32 Playwright tests green (`pnpm exec playwright test`, ~2.5 min), 156 unit tests.
+
+- Phase 0: toolchain verified (Node 24, pnpm 12.9.1, git). shadcn init failed on a corrupt npm cache; scaffold moved into the repo, converted to pnpm, preset re-applied with `shadcn apply`.
+- Phase 1: shared domain (money, calculation, view model, numbering, lifecycle, zod schemas). InvoiceVM types live in `@workspace/shared` and the templates contract re-exports them.
+- Phase 2: Hono API with auth, master data, invoices, revisions, dashboard, backup; curl walkthrough verified.
+- Phase 3: template contract, paginator, renderer, fonts, fixtures, Template 01 reviewed by eye on A4 and Letter.
+- Phase 4: web shell and settings. Phase 5: editor. Phase 6: lists, dashboard, activity. Phase 7: PDF with parity tests.
+- Phase 8: seed with 14 invoices, accessibility fixes found by axe (accessible names on selects, focusable scroll region, `main` landmark, skip link), route error page, README and memory-bank docs, Prettier run over the code base. **Found and fixed**: the web `typecheck` script had been a no-op (root tsconfig only has references); it now runs `tsc -p tsconfig.app.json`, and the three real errors it revealed were fixed.
+
+## Known limitations
+
+See README "Known limitations" and `docs/POSSIBLE_ADDITIONS.md`. Notable: one template; INR and USD only; no GST machinery; backups are a ZIP/JSON export plus copying `data/`.

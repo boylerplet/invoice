@@ -40,9 +40,14 @@ export const useEditorStore = create<EditorState>((set) => ({
   ...initial,
   load: (invoiceId, doc) => set({ ...initial, invoiceId, doc }),
   update: (change) =>
-    set((state) => (state.doc ? { doc: change(state.doc), rev: state.rev + 1, saveState: "idle" } : state)),
+    set((state) =>
+      state.doc
+        ? { doc: change(state.doc), rev: state.rev + 1, saveState: "idle" }
+        : state
+    ),
   saving: () => set({ saveState: "saving", saveError: null }),
-  saved: (rev, at) => set({ savedRev: rev, saveState: "saved", saveError: null, savedAt: at }),
+  saved: (rev, at) =>
+    set({ savedRev: rev, saveState: "saved", saveError: null, savedAt: at }),
   failed: (message) => set({ saveState: "error", saveError: message }),
   setShowErrors: (showErrors) => set({ showErrors }),
   reset: () => set(initial),

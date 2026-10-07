@@ -38,7 +38,10 @@ describe("parseMoneyInput", () => {
       ok: true,
       value: 120_000,
     })
-    expect(parseMoneyInput("₹ 99.99", "INR")).toEqual({ ok: true, value: 9_999 })
+    expect(parseMoneyInput("₹ 99.99", "INR")).toEqual({
+      ok: true,
+      value: 9_999,
+    })
   })
   it("rejects bad input", () => {
     expect(parseMoneyInput("", "INR").ok).toBe(false)

@@ -14,26 +14,51 @@ export function clientRoutes(deps: Deps, stats: StatsService) {
 
   function checkRefs(ws: string, input: ClientInput): void {
     const fields: Record<string, string> = {}
-    if (input.defaultIssuerProfileId && !profilesRepo(deps.db).get(ws, input.defaultIssuerProfileId)) {
+    if (
+      input.defaultIssuerProfileId &&
+      !profilesRepo(deps.db).get(ws, input.defaultIssuerProfileId)
+    ) {
       fields.defaultIssuerProfileId = "Unknown issuer profile"
     }
-    if (input.defaultPaymentAccountId && !paymentAccountsRepo(deps.db).get(ws, input.defaultPaymentAccountId)) {
+    if (
+      input.defaultPaymentAccountId &&
+      !paymentAccountsRepo(deps.db).get(ws, input.defaultPaymentAccountId)
+    ) {
       fields.defaultPaymentAccountId = "Unknown payment account"
     }
     if (Object.keys(fields).length > 0) {
-      throw new ApiError(422, "VALIDATION", "Please check the highlighted fields", fields)
+      throw new ApiError(
+        422,
+        "VALIDATION",
+        "Please check the highlighted fields",
+        fields
+      )
     }
   }
 
-  function log(auth: { workspaceId: string; userId: string }, clientId: string, type: string, summary: string) {
-    activityRepo(deps.db).log(auth.workspaceId, { userId: auth.userId, clientId, type, summary }, deps.now())
+  function log(
+    auth: { workspaceId: string; userId: string },
+    clientId: string,
+    type: string,
+    summary: string
+  ) {
+    activityRepo(deps.db).log(
+      auth.workspaceId,
+      { userId: auth.userId, clientId, type, summary },
+      deps.now()
+    )
   }
 
   app.get("/", (c) => {
     const ws = c.get("auth").workspaceId
     const summaries = stats.clientSummaries(ws)
     const rows = clients().list(ws, c.req.query("archived") === "true")
-    return c.json(rows.map((client) => ({ ...client, summary: summaries.get(client.id) ?? null })))
+    return c.json(
+      rows.map((client) => ({
+        ...client,
+        summary: summaries.get(client.id) ?? null,
+      }))
+    )
   })
 
   app.get("/:id", (c) => {

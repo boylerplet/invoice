@@ -106,7 +106,9 @@ describe("totals", () => {
     expect(calc.taxAmount).toBe(0)
   })
   it("no tax when disabled", () => {
-    const calc = calculate(doc({ tax: { enabled: false, label: "GST", rate: "18" } }))
+    const calc = calculate(
+      doc({ tax: { enabled: false, label: "GST", rate: "18" } })
+    )
     expect(calc.taxAmount).toBe(0)
     expect(calc.total).toBe(calc.subtotal)
   })

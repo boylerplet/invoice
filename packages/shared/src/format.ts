@@ -36,10 +36,12 @@ export function formatMoney(
 }
 
 export type ParseResult =
-  | { ok: true; value: Minor }
-  | { ok: false; error: string }
+  { ok: true; value: Minor } | { ok: false; error: string }
 
-export function parseMoneyInput(input: string, code: CurrencyCode): ParseResult {
+export function parseMoneyInput(
+  input: string,
+  code: CurrencyCode
+): ParseResult {
   const def = CURRENCIES[code]
   const cleaned = input
     .replace(def.symbol, "")
@@ -47,19 +49,36 @@ export function parseMoneyInput(input: string, code: CurrencyCode): ParseResult 
     .replace(/^[₹$]/, "")
   if (cleaned === "") return { ok: false, error: "Enter an amount" }
   const pattern = new RegExp(String.raw`^\d+(\.\d{1,${def.minorDigits}})?$`)
-  if (!pattern.test(cleaned)) return { ok: false, error: "Enter a valid amount" }
+  if (!pattern.test(cleaned))
+    return { ok: false, error: "Enter a valid amount" }
   const minor = Number(new Big(cleaned).times(10 ** def.minorDigits).toFixed(0))
-  if (!Number.isSafeInteger(minor)) return { ok: false, error: "Amount is too large" }
+  if (!Number.isSafeInteger(minor))
+    return { ok: false, error: "Amount is too large" }
   return { ok: true, value: minor }
 }
 
 /** Minor units → plain editable string for an input ("1500.5" style, no grouping). */
 export function minorToInput(minor: Minor, code: CurrencyCode): string {
   const def = CURRENCIES[code]
-  return normalizeDecimal(new Big(minor).div(10 ** def.minorDigits).toFixed(def.minorDigits))
+  return normalizeDecimal(
+    new Big(minor).div(10 ** def.minorDigits).toFixed(def.minorDigits)
+  )
 }
 
-const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+const MONTHS = [
+  "Jan",
+  "Feb",
+  "Mar",
+  "Apr",
+  "May",
+  "Jun",
+  "Jul",
+  "Aug",
+  "Sep",
+  "Oct",
+  "Nov",
+  "Dec",
+]
 
 /** "2026-04-15" → "15 Apr 2026". */
 export function formatDate(iso: string): string {

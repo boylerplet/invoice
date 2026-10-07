@@ -6,7 +6,14 @@ import type {
   PaperSize,
   WorkspaceSettings,
 } from "@workspace/shared"
-import { index, integer, primaryKey, sqliteTable, text, uniqueIndex } from "drizzle-orm/sqlite-core"
+import {
+  index,
+  integer,
+  primaryKey,
+  sqliteTable,
+  text,
+  uniqueIndex,
+} from "drizzle-orm/sqlite-core"
 
 const json = <T>(name: string) => text(name, { mode: "json" }).$type<T>()
 

@@ -16,7 +16,10 @@ export function parseArgs(argv: string[]): Record<string, string | true> {
   return out
 }
 
-export function stringArg(args: Record<string, string | true>, key: string): string | undefined {
+export function stringArg(
+  args: Record<string, string | true>,
+  key: string
+): string | undefined {
   const value = args[key]
   return typeof value === "string" ? value : undefined
 }

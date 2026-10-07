@@ -13,8 +13,18 @@ export function printRoutes(deps: Deps) {
 
   app.get("/:id", (c) => {
     const id = c.req.param("id")
-    const claims = verifyPrintToken(deps.config.printSecret, c.req.query("token") ?? "", id, deps.now())
-    if (!claims) throw new ApiError(403, "BAD_TOKEN", "This print link is invalid or has expired")
+    const claims = verifyPrintToken(
+      deps.config.printSecret,
+      c.req.query("token") ?? "",
+      id,
+      deps.now()
+    )
+    if (!claims)
+      throw new ApiError(
+        403,
+        "BAD_TOKEN",
+        "This print link is invalid or has expired"
+      )
     const row = invoicesRepo(deps.db).get(claims.ws, id)
     if (!row) throw new ApiError(404, "NOT_FOUND", "Invoice not found")
     return c.json({ doc: row.data, status: row.status })

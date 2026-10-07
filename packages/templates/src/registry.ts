@@ -9,18 +9,28 @@ export function listTemplates(): TemplateManifest[] {
 }
 
 export function latestVersion(id: string): number | null {
-  const versions = MODULES.filter((m) => m.manifest.id === id).map((m) => m.manifest.version)
+  const versions = MODULES.filter((m) => m.manifest.id === id).map(
+    (m) => m.manifest.version
+  )
   return versions.length === 0 ? null : Math.max(...versions)
 }
 
 /** Without `version`, resolves the latest released version. */
-export function getTemplate(id: string, version?: number): TemplateModule | null {
+export function getTemplate(
+  id: string,
+  version?: number
+): TemplateModule | null {
   const wanted = version ?? latestVersion(id)
-  return MODULES.find((m) => m.manifest.id === id && m.manifest.version === wanted) ?? null
+  return (
+    MODULES.find(
+      (m) => m.manifest.id === id && m.manifest.version === wanted
+    ) ?? null
+  )
 }
 
 export function requireTemplate(id: string, version?: number): TemplateModule {
   const found = getTemplate(id, version)
-  if (!found) throw new Error(`Unknown template ${id}${version ? ` v${version}` : ""}`)
+  if (!found)
+    throw new Error(`Unknown template ${id}${version ? ` v${version}` : ""}`)
   return found
 }

@@ -12,7 +12,11 @@ import { TemplatesSettings } from "./TemplatesSettings"
 const TABS = [
   { key: "business", label: "Business", Component: BusinessSettings },
   { key: "profiles", label: "Issuer profiles", Component: ProfilesSettings },
-  { key: "payment-accounts", label: "Payment accounts", Component: PaymentAccountsSettings },
+  {
+    key: "payment-accounts",
+    label: "Payment accounts",
+    Component: PaymentAccountsSettings,
+  },
   { key: "numbering", label: "Numbering", Component: NumberingSettings },
   { key: "templates", label: "Templates", Component: TemplatesSettings },
   { key: "account", label: "Account", Component: AccountSettings },
@@ -27,9 +31,15 @@ export function SettingsLayout() {
 
   return (
     <div className="mx-auto w-full max-w-5xl space-y-6 p-4 md:p-6">
-      <PageHeader title="Settings" description="Everything needed to start invoicing." />
+      <PageHeader
+        title="Settings"
+        description="Everything needed to start invoicing."
+      />
       <div className="flex flex-col gap-6 md:flex-row">
-        <nav aria-label="Settings sections" className="flex shrink-0 gap-1 overflow-x-auto md:w-48 md:flex-col">
+        <nav
+          aria-label="Settings sections"
+          className="flex shrink-0 gap-1 overflow-x-auto md:w-48 md:flex-col"
+        >
           {TABS.map((t) => (
             <NavLink
               key={t.key}
@@ -37,7 +47,9 @@ export function SettingsLayout() {
               className={({ isActive }) =>
                 cn(
                   "rounded-md px-3 py-1.5 text-sm whitespace-nowrap",
-                  isActive ? "bg-accent text-accent-foreground font-medium" : "text-muted-foreground hover:bg-accent/50"
+                  isActive
+                    ? "bg-accent font-medium text-accent-foreground"
+                    : "text-muted-foreground hover:bg-accent/50"
                 )
               }
             >

@@ -5,7 +5,12 @@ import { deleteCookie, getCookie, setCookie } from "hono/cookie"
 import { hashPassword, verifyPassword } from "../auth/password"
 import { requireAuth, SESSION_COOKIE } from "../auth/middleware"
 import { LoginLimiter } from "../auth/rate-limit"
-import { createSession, destroySession, destroyUserSessions, SESSION_DAYS } from "../auth/sessions"
+import {
+  createSession,
+  destroySession,
+  destroyUserSessions,
+  SESSION_DAYS,
+} from "../auth/sessions"
 import { jsonBody } from "../http/body"
 import { ApiError } from "../http/errors"
 import type { AppEnv, Deps } from "../http/types"
@@ -28,10 +33,16 @@ export function authRoutes(deps: Deps) {
     const input = await jsonBody(c, loginInputSchema)
     const key = `${input.username.toLowerCase()}|${clientIp(c)}`
     if (limiter.isBlocked(key)) {
-      throw new ApiError(429, "RATE_LIMITED", "Too many failed attempts. Try again in 15 minutes.")
+      throw new ApiError(
+        429,
+        "RATE_LIMITED",
+        "Too many failed attempts. Try again in 15 minutes."
+      )
     }
     const user = usersRepo(deps.db).getByUsername(input.username)
-    const ok = user ? await verifyPassword(user.passwordHash, input.password) : false
+    const ok = user
+      ? await verifyPassword(user.passwordHash, input.password)
+      : false
     if (!user || !ok) {
       limiter.recordFailure(key)
       throw new ApiError(401, "BAD_CREDENTIALS", "Wrong username or password")
@@ -67,8 +78,13 @@ export function authRoutes(deps: Deps) {
     const input = await jsonBody(c, changePasswordInputSchema)
     const repo = usersRepo(deps.db)
     const user = repo.getById(auth.userId)
-    if (!user || !(await verifyPassword(user.passwordHash, input.currentPassword))) {
-      throw new ApiError(422, "VALIDATION", "Current password is wrong", { currentPassword: "Wrong password" })
+    if (
+      !user ||
+      !(await verifyPassword(user.passwordHash, input.currentPassword))
+    ) {
+      throw new ApiError(422, "VALIDATION", "Current password is wrong", {
+        currentPassword: "Wrong password",
+      })
     }
     repo.setPassword(user.id, await hashPassword(input.newPassword))
     destroyUserSessions(deps.db, user.id)

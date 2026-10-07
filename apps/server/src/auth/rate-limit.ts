@@ -6,7 +6,9 @@ export class LoginLimiter {
   private failures = new Map<string, number[]>()
 
   private recent(key: string, now: number): number[] {
-    const list = (this.failures.get(key) ?? []).filter((t) => now - t < WINDOW_MS)
+    const list = (this.failures.get(key) ?? []).filter(
+      (t) => now - t < WINDOW_MS
+    )
     this.failures.set(key, list)
     return list
   }

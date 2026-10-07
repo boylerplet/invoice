@@ -26,7 +26,9 @@ export function PrintPage() {
     api
       .get<PrintData>(`/print/${id}?token=${encodeURIComponent(token)}`)
       .then(setData)
-      .catch((e: unknown) => setError(e instanceof Error ? e.message : "Could not load the invoice"))
+      .catch((e: unknown) =>
+        setError(e instanceof Error ? e.message : "Could not load the invoice")
+      )
   }, [id, token])
 
   const built = useInvoiceVm(data?.doc ?? null, data?.status ?? "DRAFT")
@@ -36,7 +38,11 @@ export function PrintPage() {
   return (
     <>
       <style>{`@page{size:${w}mm ${h}mm;margin:0}html,body{margin:0;padding:0;background:#fff!important;color-scheme:light}`}</style>
-      <InvoiceDocument vm={built.vm} template={built.template} paperSize={data.doc.presentation.paperSize} />
+      <InvoiceDocument
+        vm={built.vm}
+        template={built.template}
+        paperSize={data.doc.presentation.paperSize}
+      />
     </>
   )
 }

@@ -18,15 +18,26 @@ const CANDIDATES = [
 ]
 
 /** The browser used for PDFs: PUPPETEER_EXECUTABLE_PATH, else the first installed Chrome/Edge/Chromium. */
-export function findBrowser(config: Pick<Config, "puppeteerExecutablePath">, exists: (path: string) => boolean = existsSync): string | null {
-  if (config.puppeteerExecutablePath) return exists(config.puppeteerExecutablePath) ? config.puppeteerExecutablePath : null
+export function findBrowser(
+  config: Pick<Config, "puppeteerExecutablePath">,
+  exists: (path: string) => boolean = existsSync
+): string | null {
+  if (config.puppeteerExecutablePath)
+    return exists(config.puppeteerExecutablePath)
+      ? config.puppeteerExecutablePath
+      : null
   return CANDIDATES.find(exists) ?? null
 }
 
 /** Characters Windows and most file systems reject, plus control characters. */
 export function pdfFilename(number: string, clientName: string): string {
-  const printable = [...`${number} - ${clientName}`].filter((ch) => ch.charCodeAt(0) >= 32).join("")
-  const clean = printable.replace(/[\\/:*?"<>|]/g, "").replace(/\s+/g, " ").trim()
+  const printable = [...`${number} - ${clientName}`]
+    .filter((ch) => ch.charCodeAt(0) >= 32)
+    .join("")
+  const clean = printable
+    .replace(/[\\/:*?"<>|]/g, "")
+    .replace(/\s+/g, " ")
+    .trim()
   return `${clean || "invoice"}.pdf`
 }
 
@@ -49,7 +60,11 @@ export function createPdfRenderer(config: Config): PdfRenderer {
         "PDF export needs Chrome, Edge or Chromium. Install one, or set PUPPETEER_EXECUTABLE_PATH to its executable."
       )
     }
-    return puppeteer.launch({ executablePath, headless: true, args: ["--no-first-run", "--disable-gpu", "--font-render-hinting=none"] })
+    return puppeteer.launch({
+      executablePath,
+      headless: true,
+      args: ["--no-first-run", "--disable-gpu", "--font-render-hinting=none"],
+    })
   }
 
   async function get(): Promise<Browser> {
@@ -69,8 +84,13 @@ export function createPdfRenderer(config: Config): PdfRenderer {
     async render(printUrl) {
       const page = await (await get()).newPage()
       try {
-        await page.goto(printUrl, { waitUntil: "networkidle0", timeout: 30_000 })
-        await page.waitForFunction("window.__INVOICE_READY__ === true", { timeout: 30_000 })
+        await page.goto(printUrl, {
+          waitUntil: "networkidle0",
+          timeout: 30_000,
+        })
+        await page.waitForFunction("window.__INVOICE_READY__ === true", {
+          timeout: 30_000,
+        })
         return await page.pdf({
           preferCSSPageSize: true,
           printBackground: true,

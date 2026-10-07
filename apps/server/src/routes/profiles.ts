@@ -17,14 +17,24 @@ export function profileRoutes(deps: Deps) {
   const accounts = () => paymentAccountsRepo(deps.db)
 
   function checkRefs(ws: string, input: IssuerProfileInput): void {
-    if (input.defaultPaymentAccountId && !accounts().get(ws, input.defaultPaymentAccountId)) {
+    if (
+      input.defaultPaymentAccountId &&
+      !accounts().get(ws, input.defaultPaymentAccountId)
+    ) {
       throw new ApiError(422, "VALIDATION", "Unknown payment account", {
         defaultPaymentAccountId: "Unknown payment account",
       })
     }
   }
 
-  app.get("/", (c) => c.json(profiles().list(c.get("auth").workspaceId, c.req.query("archived") === "true")))
+  app.get("/", (c) =>
+    c.json(
+      profiles().list(
+        c.get("auth").workspaceId,
+        c.req.query("archived") === "true"
+      )
+    )
+  )
 
   app.get("/:id", (c) => {
     const row = profiles().get(c.get("auth").workspaceId, c.req.param("id"))
@@ -37,7 +47,10 @@ export function profileRoutes(deps: Deps) {
     const input = await jsonBody(c, issuerProfileInputSchema)
     checkRefs(ws, input)
     const isFirst = profiles().list(ws, true).length === 0
-    const row = profiles().create(ws, { ...input, isDefault: isFirst || input.isDefault })
+    const row = profiles().create(ws, {
+      ...input,
+      isDefault: isFirst || input.isDefault,
+    })
     if (row.isDefault) profiles().setDefault(ws, row.id)
     return c.json(profiles().get(ws, row.id), 201)
   })
@@ -76,8 +89,12 @@ export function profileRoutes(deps: Deps) {
     if (!profile) throw notFound("Issuer profile")
     const form = await c.req.parseBody()
     const file = form["file"]
-    if (!(file instanceof File)) throw new ApiError(400, "NO_FILE", "Attach the logo as form field 'file'")
-    const stored = saveLogo(deps.config.uploadsDir, new Uint8Array(await file.arrayBuffer()))
+    if (!(file instanceof File))
+      throw new ApiError(400, "NO_FILE", "Attach the logo as form field 'file'")
+    const stored = saveLogo(
+      deps.config.uploadsDir,
+      new Uint8Array(await file.arrayBuffer())
+    )
     profiles().setLogo(ws, id, stored)
     deleteUpload(deps.config.uploadsDir, profile.logoFile)
     return c.json(profiles().get(ws, id))
@@ -101,12 +118,24 @@ export function paymentAccountRoutes(deps: Deps) {
   const accounts = () => paymentAccountsRepo(deps.db)
 
   function checkRefs(ws: string, input: PaymentAccountInput): void {
-    if (input.issuerProfileId && !profilesRepo(deps.db).get(ws, input.issuerProfileId)) {
-      throw new ApiError(422, "VALIDATION", "Unknown issuer profile", { issuerProfileId: "Unknown issuer profile" })
+    if (
+      input.issuerProfileId &&
+      !profilesRepo(deps.db).get(ws, input.issuerProfileId)
+    ) {
+      throw new ApiError(422, "VALIDATION", "Unknown issuer profile", {
+        issuerProfileId: "Unknown issuer profile",
+      })
     }
   }
 
-  app.get("/", (c) => c.json(accounts().list(c.get("auth").workspaceId, c.req.query("archived") === "true")))
+  app.get("/", (c) =>
+    c.json(
+      accounts().list(
+        c.get("auth").workspaceId,
+        c.req.query("archived") === "true"
+      )
+    )
+  )
 
   app.post("/", async (c) => {
     const ws = c.get("auth").workspaceId

@@ -11,7 +11,15 @@ interface PartyProps {
   taxIds: { label: string; value: string }[]
 }
 
-const Party: FC<PartyProps> = ({ label, name, secondary, addressLines, email, phone, taxIds }) => (
+const Party: FC<PartyProps> = ({
+  label,
+  name,
+  secondary,
+  addressLines,
+  email,
+  phone,
+  taxIds,
+}) => (
   <div>
     <div className="label">{label}</div>
     <div className="party__name">{name}</div>

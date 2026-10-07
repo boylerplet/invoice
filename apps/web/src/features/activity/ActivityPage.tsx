@@ -18,7 +18,10 @@ export function ActivityPage() {
 
   return (
     <div className="mx-auto w-full max-w-3xl space-y-5 p-4 md:p-6">
-      <PageHeader title="Activity" description="Every change to invoices and clients." />
+      <PageHeader
+        title="Activity"
+        description="Every change to invoices and clients."
+      />
       {activity.isPending ? (
         <Skeleton className="h-64 w-full" />
       ) : rows.length === 0 ? (
@@ -28,8 +31,13 @@ export function ActivityPage() {
           {rows.map((row) => {
             const to = target(row)
             return (
-              <li key={row.id} className="flex items-baseline gap-3 px-4 py-2.5 text-sm">
-                <span className="text-muted-foreground w-24 shrink-0 text-xs">{relativeTime(row.at)}</span>
+              <li
+                key={row.id}
+                className="flex items-baseline gap-3 px-4 py-2.5 text-sm"
+              >
+                <span className="w-24 shrink-0 text-xs text-muted-foreground">
+                  {relativeTime(row.at)}
+                </span>
                 {to ? (
                   <Link to={to} className="hover:underline">
                     {row.summary}
@@ -43,7 +51,11 @@ export function ActivityPage() {
         </ul>
       )}
       {activity.hasNextPage && (
-        <Button variant="outline" disabled={activity.isFetchingNextPage} onClick={() => void activity.fetchNextPage()}>
+        <Button
+          variant="outline"
+          disabled={activity.isFetchingNextPage}
+          onClick={() => void activity.fetchNextPage()}
+        >
           {activity.isFetchingNextPage ? "Loading..." : "Load more"}
         </Button>
       )}

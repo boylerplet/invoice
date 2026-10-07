@@ -7,7 +7,8 @@ import type { AuthContext } from "../http/types"
 export const SESSION_DAYS = 30
 const DAY_MS = 86_400_000
 
-const digest = (token: string) => createHash("sha256").update(token).digest("hex")
+const digest = (token: string) =>
+  createHash("sha256").update(token).digest("hex")
 
 export function createSession(db: Db, userId: string, now: Date): string {
   const token = randomBytes(32).toString("base64url")
@@ -24,7 +25,11 @@ export function createSession(db: Db, userId: string, now: Date): string {
 }
 
 /** Returns the signed-in user and slides the expiry, or null if missing/expired. */
-export function resolveSession(db: Db, token: string, now: Date): AuthContext | null {
+export function resolveSession(
+  db: Db,
+  token: string,
+  now: Date
+): AuthContext | null {
   const id = digest(token)
   const row = db
     .select({
@@ -49,11 +54,17 @@ export function resolveSession(db: Db, token: string, now: Date): AuthContext | 
     })
     .where(eq(sessions.id, id))
     .run()
-  return { userId: row.userId, workspaceId: row.workspaceId, username: row.username }
+  return {
+    userId: row.userId,
+    workspaceId: row.workspaceId,
+    username: row.username,
+  }
 }
 
 export function destroySession(db: Db, token: string): void {
-  db.delete(sessions).where(eq(sessions.id, digest(token))).run()
+  db.delete(sessions)
+    .where(eq(sessions.id, digest(token)))
+    .run()
 }
 
 export function destroyUserSessions(db: Db, userId: string): void {

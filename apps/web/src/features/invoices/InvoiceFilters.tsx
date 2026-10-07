@@ -38,7 +38,12 @@ interface Props {
 }
 
 /** Search and filters for invoice lists. Every control writes to the URL. */
-export function InvoiceFilters({ params, hideClient, groupByProfile, onGroupByProfile }: Props) {
+export function InvoiceFilters({
+  params,
+  hideClient,
+  groupByProfile,
+  onGroupByProfile,
+}: Props) {
   const { filters, set, clear, hasFilters } = params
   const clients = useClients()
   const profiles = useProfiles()
@@ -53,37 +58,108 @@ export function InvoiceFilters({ params, hideClient, groupByProfile, onGroupByPr
   return (
     <div className="flex flex-wrap items-center gap-2">
       <div className="relative w-full sm:w-64">
-        <Icon icon={Search01Icon} className="text-muted-foreground absolute top-2.5 left-2.5 size-4" />
-        <Input aria-label="Search invoices" placeholder="Search number, client or reference" className="pl-8" value={text} onChange={(e) => setText(e.target.value)} />
+        <Icon
+          icon={Search01Icon}
+          className="absolute top-2.5 left-2.5 size-4 text-muted-foreground"
+        />
+        <Input
+          aria-label="Search invoices"
+          placeholder="Search number, client or reference"
+          className="pl-8"
+          value={text}
+          onChange={(e) => setText(e.target.value)}
+        />
       </div>
-      <SelectField id="filter-status" className="w-36" value={filters.status ?? ALL} options={STATUS_OPTIONS} onChange={(v) => set({ status: v === ALL ? undefined : v })} />
+      <SelectField
+        id="filter-status"
+        label="Status"
+        className="w-36"
+        value={filters.status ?? ALL}
+        options={STATUS_OPTIONS}
+        onChange={(v) => set({ status: v === ALL ? undefined : v })}
+      />
       {!hideClient && (
         <SelectField
           id="filter-client"
+          label="Client"
           className="w-44"
           value={filters.clientId ?? ALL}
-          options={[{ value: ALL, label: "All clients" }, ...(clients.data ?? []).map((c) => ({ value: c.id, label: c.name }))]}
+          options={[
+            { value: ALL, label: "All clients" },
+            ...(clients.data ?? []).map((c) => ({
+              value: c.id,
+              label: c.name,
+            })),
+          ]}
           onChange={(v) => set({ clientId: v === ALL ? undefined : v })}
         />
       )}
       <SelectField
         id="filter-profile"
+        label="Issuer profile"
         className="w-44"
         value={filters.profileId ?? ALL}
-        options={[{ value: ALL, label: "All profiles" }, ...(profiles.data ?? []).map((p) => ({ value: p.id, label: p.displayName }))]}
+        options={[
+          { value: ALL, label: "All profiles" },
+          ...(profiles.data ?? []).map((p) => ({
+            value: p.id,
+            label: p.displayName,
+          })),
+        ]}
         onChange={(v) => set({ profileId: v === ALL ? undefined : v })}
       />
-      <SelectField className="w-28" value={filters.currency ?? ALL} options={[{ value: ALL, label: "Any currency" }, { value: "INR", label: "INR" }, { value: "USD", label: "USD" }]} onChange={(v) => set({ currency: v === ALL ? undefined : v })} />
-      <Input aria-label="Issued from" type="date" className="w-36" value={filters.from ?? ""} onChange={(e) => set({ from: e.target.value })} />
-      <Input aria-label="Issued to" type="date" className="w-36" value={filters.to ?? ""} onChange={(e) => set({ to: e.target.value })} />
-      <SelectField className="w-40" value={filters.sort ?? "issueDate_desc"} options={SORT_OPTIONS} onChange={(v) => set({ sort: v === "issueDate_desc" ? undefined : v })} />
+      <SelectField
+        label="Currency"
+        className="w-36"
+        value={filters.currency ?? ALL}
+        options={[
+          { value: ALL, label: "Any currency" },
+          { value: "INR", label: "INR" },
+          { value: "USD", label: "USD" },
+        ]}
+        onChange={(v) => set({ currency: v === ALL ? undefined : v })}
+      />
+      <Input
+        aria-label="Issued from"
+        type="date"
+        className="w-36"
+        value={filters.from ?? ""}
+        onChange={(e) => set({ from: e.target.value })}
+      />
+      <Input
+        aria-label="Issued to"
+        type="date"
+        className="w-36"
+        value={filters.to ?? ""}
+        onChange={(e) => set({ to: e.target.value })}
+      />
+      <SelectField
+        label="Sort order"
+        className="w-40"
+        value={filters.sort ?? "issueDate_desc"}
+        options={SORT_OPTIONS}
+        onChange={(v) => set({ sort: v === "issueDate_desc" ? undefined : v })}
+      />
       {onGroupByProfile && (
-        <Button type="button" variant={groupByProfile ? "secondary" : "ghost"} size="sm" onClick={() => onGroupByProfile(!groupByProfile)}>
+        <Button
+          type="button"
+          variant={groupByProfile ? "secondary" : "ghost"}
+          size="sm"
+          onClick={() => onGroupByProfile(!groupByProfile)}
+        >
           Group by profile
         </Button>
       )}
       {hasFilters && (
-        <Button type="button" variant="ghost" size="sm" onClick={() => { setText(""); clear() }}>
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          onClick={() => {
+            setText("")
+            clear()
+          }}
+        >
           Clear filters
         </Button>
       )}

@@ -1,6 +1,7 @@
 import type { ZodType } from "zod"
 
-export type ErrorStatus = 400 | 401 | 403 | 404 | 409 | 413 | 415 | 422 | 429 | 500 | 503
+export type ErrorStatus =
+  400 | 401 | 403 | 404 | 409 | 413 | 415 | 422 | 429 | 500 | 503
 
 export class ApiError extends Error {
   constructor(
@@ -26,5 +27,10 @@ export function parse<T>(schema: ZodType<T>, data: unknown): T {
     const key = issue.path.join(".") || "_"
     fields[key] ??= issue.message
   }
-  throw new ApiError(422, "VALIDATION", "Please check the highlighted fields", fields)
+  throw new ApiError(
+    422,
+    "VALIDATION",
+    "Please check the highlighted fields",
+    fields
+  )
 }

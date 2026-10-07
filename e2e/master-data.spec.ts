@@ -3,22 +3,32 @@ import { login } from "./helpers"
 
 test.describe.configure({ mode: "serial" })
 
-test("unauthenticated visitors are sent to the login page", async ({ page }) => {
+test("unauthenticated visitors are sent to the login page", async ({
+  page,
+}) => {
   await page.goto("/clients")
   await expect(page).toHaveURL(/\/login$/)
   await page.getByLabel("Username").fill("demo")
   await page.getByLabel("Password").fill("wrong-password")
   await page.getByRole("button", { name: "Sign in" }).click()
-  await expect(page.getByRole("alert")).toContainText("Wrong username or password")
+  await expect(page.getByRole("alert")).toContainText(
+    "Wrong username or password"
+  )
 })
 
-test("a user can set up numbering, profile, payment account and client", async ({ page }) => {
+test("a user can set up numbering, profile, payment account and client", async ({
+  page,
+}) => {
   await login(page)
 
   await page.goto("/settings/numbering")
-  await expect(page.getByTestId("number-preview")).toContainText(`INV-${new Date().getFullYear()}-`)
+  await expect(page.getByTestId("number-preview")).toContainText(
+    `INV-${new Date().getFullYear()}-`
+  )
   await page.getByLabel("Prefix").fill("ACME")
-  await expect(page.getByTestId("number-preview")).toContainText(`ACME-${new Date().getFullYear()}-`)
+  await expect(page.getByTestId("number-preview")).toContainText(
+    `ACME-${new Date().getFullYear()}-`
+  )
   await page.getByRole("button", { name: "Save numbering" }).click()
   await expect(page.getByText("Numbering saved")).toBeVisible()
 
@@ -44,10 +54,12 @@ test("a user can set up numbering, profile, payment account and client", async (
 
   await page.goto("/clients")
   await page.getByRole("button", { name: "New client" }).first().click()
-  await page.getByLabel("Client name").fill("Kaveri Automation Pvt Ltd")
+  await page.getByLabel("Client name").fill("E2E Test Client")
   await page.getByRole("button", { name: "Save client" }).click()
   await expect(page.getByText("Client created")).toBeVisible()
-  await expect(page.getByRole("link", { name: "Kaveri Automation Pvt Ltd" })).toBeVisible()
+  await expect(
+    page.getByRole("link", { name: "E2E Test Client" })
+  ).toBeVisible()
 
   await page.getByLabel("Search clients").fill("zzz")
   await expect(page.getByText("No clients match your search")).toBeVisible()

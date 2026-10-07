@@ -5,9 +5,14 @@ import { dirname, resolve } from "node:path"
 import { fileURLToPath } from "node:url"
 import * as schema from "./schema"
 
-export type Db = BetterSQLite3Database<typeof schema> & { $client: Database.Database }
+export type Db = BetterSQLite3Database<typeof schema> & {
+  $client: Database.Database
+}
 
-const MIGRATIONS = resolve(dirname(fileURLToPath(import.meta.url)), "../../drizzle")
+const MIGRATIONS = resolve(
+  dirname(fileURLToPath(import.meta.url)),
+  "../../drizzle"
+)
 
 /** Opens (and migrates) a SQLite database. Use ":memory:" in tests. */
 export function openDb(file: string): Db {

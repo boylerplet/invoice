@@ -78,13 +78,21 @@ export function AppShell({ workspaceName, username, children }: Props) {
 
   return (
     <SidebarProvider>
+      <a
+        href="#main"
+        className="sr-only z-50 rounded-md bg-background px-3 py-2 text-sm focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:ring-2 focus:ring-ring"
+      >
+        Skip to content
+      </a>
       <Sidebar collapsible="icon">
         <SidebarHeader>
           <div className="flex items-center gap-2 px-2 py-1.5">
-            <div className="bg-primary text-primary-foreground flex size-8 shrink-0 items-center justify-center rounded-md text-sm font-bold">
+            <div className="flex size-8 shrink-0 items-center justify-center rounded-md bg-primary text-sm font-bold text-primary-foreground">
               IS
             </div>
-            <span className="truncate text-sm font-semibold group-data-[collapsible=icon]:hidden">Invoice Studio</span>
+            <span className="truncate text-sm font-semibold group-data-[collapsible=icon]:hidden">
+              Invoice Studio
+            </span>
           </div>
         </SidebarHeader>
         <SidebarContent>
@@ -93,7 +101,11 @@ export function AppShell({ workspaceName, username, children }: Props) {
               <SidebarMenu>
                 {NAV.map((item) => (
                   <SidebarMenuItem key={item.to}>
-                    <SidebarMenuButton isActive={isActive(pathname, item)} tooltip={item.label} render={<Link to={item.to} />}>
+                    <SidebarMenuButton
+                      isActive={isActive(pathname, item)}
+                      tooltip={item.label}
+                      render={<Link to={item.to} />}
+                    >
                       <Icon icon={item.icon} />
                       <span>{item.label}</span>
                     </SidebarMenuButton>
@@ -106,15 +118,23 @@ export function AppShell({ workspaceName, username, children }: Props) {
         <SidebarRail />
       </Sidebar>
       <SidebarInset className="min-w-0">
-        <header className="bg-background sticky top-0 z-20 flex h-12 shrink-0 items-center gap-2 border-b px-3">
+        <header className="sticky top-0 z-20 flex h-12 shrink-0 items-center gap-2 border-b bg-background px-3">
           <SidebarTrigger />
-          <span className="text-muted-foreground truncate text-sm">{workspaceName}</span>
+          <span className="truncate text-sm text-muted-foreground">
+            {workspaceName}
+          </span>
           <div className="flex-1" />
           <CommandPalette />
           <DropdownMenu>
-            <DropdownMenuTrigger render={<Button variant="ghost" size="icon" aria-label="Account menu" />}>
+            <DropdownMenuTrigger
+              render={
+                <Button variant="ghost" size="icon" aria-label="Account menu" />
+              }
+            >
               <Avatar className="size-7">
-                <AvatarFallback className="text-xs uppercase">{username.slice(0, 2)}</AvatarFallback>
+                <AvatarFallback className="text-xs uppercase">
+                  {username.slice(0, 2)}
+                </AvatarFallback>
               </Avatar>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-48">
@@ -131,7 +151,9 @@ export function AppShell({ workspaceName, username, children }: Props) {
             </DropdownMenuContent>
           </DropdownMenu>
         </header>
-        <div className="min-h-0 flex-1">{children}</div>
+        <main id="main" className="min-h-0 flex-1">
+          {children}
+        </main>
       </SidebarInset>
     </SidebarProvider>
   )

@@ -1,9 +1,19 @@
 import { useEffect, useRef, type FC } from "react"
-import { PAPER_MM, type InvoiceVM, type PagePlan, type PaperSize, type TemplateModule } from "./contract"
+import {
+  PAPER_MM,
+  type InvoiceVM,
+  type PagePlan,
+  type PaperSize,
+  type TemplateModule,
+} from "./contract"
 import { visibleColumns } from "./layout/columns"
 import { RowBlock, TemplateRoot } from "./layout/TemplateRoot"
 import { buildUnits, continuedRow, lastRowIds } from "./layout/units"
-import { useInvoiceLayout, type InvoiceLayout, type LayoutSnapshot } from "./layout/useInvoiceLayout"
+import {
+  useInvoiceLayout,
+  type InvoiceLayout,
+  type LayoutSnapshot,
+} from "./layout/useInvoiceLayout"
 
 declare global {
   interface Window {
@@ -25,7 +35,11 @@ export interface InvoiceDocumentProps {
 
 const block = { display: "flow-root", flex: "none" } as const
 
-const PageView: FC<{ snapshot: LayoutSnapshot; page: PagePlan; pageCount: number }> = ({ snapshot, page, pageCount }) => {
+const PageView: FC<{
+  snapshot: LayoutSnapshot
+  page: PagePlan
+  pageCount: number
+}> = ({ snapshot, page, pageCount }) => {
   const { vm, template, paper } = snapshot
   const { manifest } = template
   const { w, h } = PAPER_MM[paper]
@@ -35,7 +49,9 @@ const PageView: FC<{ snapshot: LayoutSnapshot; page: PagePlan; pageCount: number
   const byId = new Map(units.map((u) => [u.id, u]))
   const lastIds = lastRowIds(vm)
   const placed = page.unitIds.flatMap((id) => byId.get(id)?.rows ?? [])
-  const parent = page.continuedGroupId ? vm.groups.find((g) => g.id === page.continuedGroupId)?.rows[0] : undefined
+  const parent = page.continuedGroupId
+    ? vm.groups.find((g) => g.id === page.continuedGroupId)?.rows[0]
+    : undefined
   const isLastPage = page.pageNumber === pageCount
   const spacer = <div style={{ flex: "1 1 0", minHeight: 0 }} />
   const terminal = page.hasTerminal ? (
@@ -63,9 +79,22 @@ const PageView: FC<{ snapshot: LayoutSnapshot; page: PagePlan; pageCount: number
       }}
     >
       {template.PageDecoration && (
-        <template.PageDecoration vm={vm} pageNumber={page.pageNumber} pageCount={pageCount} variant={page.variant} />
+        <template.PageDecoration
+          vm={vm}
+          pageNumber={page.pageNumber}
+          pageCount={pageCount}
+          variant={page.variant}
+        />
       )}
-      <div data-page-body style={{ display: "flex", flexDirection: "column", height: "100%", position: "relative" }}>
+      <div
+        data-page-body
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          height: "100%",
+          position: "relative",
+        }}
+      >
         <div data-block="header" style={block}>
           <template.PageHeader vm={vm} variant={page.variant} />
         </div>
@@ -114,7 +143,11 @@ const PageView: FC<{ snapshot: LayoutSnapshot; page: PagePlan; pageCount: number
           </>
         )}
         <div data-block="footer" style={block}>
-          <template.PageFooter vm={vm} pageNumber={page.pageNumber} pageCount={pageCount} />
+          <template.PageFooter
+            vm={vm}
+            pageNumber={page.pageNumber}
+            pageCount={pageCount}
+          />
         </div>
       </div>
     </TemplateRoot>
@@ -122,7 +155,13 @@ const PageView: FC<{ snapshot: LayoutSnapshot; page: PagePlan; pageCount: number
 }
 
 /** The one renderer: the editor preview and the PDF both render this component. */
-export const InvoiceDocument: FC<InvoiceDocumentProps> = ({ vm, template, paperSize, gap = 0, onLayout }) => {
+export const InvoiceDocument: FC<InvoiceDocumentProps> = ({
+  vm,
+  template,
+  paperSize,
+  gap = 0,
+  onLayout,
+}) => {
   const layout = useInvoiceLayout(vm, template, paperSize)
   const { snapshot, status } = layout
   const rootRef = useRef<HTMLDivElement>(null)
@@ -136,11 +175,17 @@ export const InvoiceDocument: FC<InvoiceDocumentProps> = ({ vm, template, paperS
     window.__INVOICE_READY__ = false
     const root = rootRef.current
     if (!ready || !root) return
-    const bodies = Array.from(root.querySelectorAll<HTMLElement>("[data-page-body]"))
-    const overflowing = bodies.filter((el) => el.scrollHeight > el.clientHeight + 1)
+    const bodies = Array.from(
+      root.querySelectorAll<HTMLElement>("[data-page-body]")
+    )
+    const overflowing = bodies.filter(
+      (el) => el.scrollHeight > el.clientHeight + 1
+    )
     root.dataset.overflow = String(overflowing.length)
     if (overflowing.length > 0 && import.meta.env.DEV) {
-      console.error(`Template ${template.manifest.id}: ${overflowing.length} page(s) overflow their content box`)
+      console.error(
+        `Template ${template.manifest.id}: ${overflowing.length} page(s) overflow their content box`
+      )
     }
     window.__INVOICE_READY__ = true
     return () => {
@@ -155,9 +200,22 @@ export const InvoiceDocument: FC<InvoiceDocumentProps> = ({ vm, template, paperS
       className="tpl-doc"
       data-layout-status={status}
       data-page-count={plan.length}
-      style={{ display: "flex", flexDirection: "column", gap, width: "max-content" }}
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        gap,
+        width: "max-content",
+      }}
     >
-      {snapshot && plan.map((page) => <PageView key={page.pageNumber} snapshot={snapshot} page={page} pageCount={plan.length} />)}
+      {snapshot &&
+        plan.map((page) => (
+          <PageView
+            key={page.pageNumber}
+            snapshot={snapshot}
+            page={page}
+            pageCount={plan.length}
+          />
+        ))}
     </div>
   )
 }

@@ -57,11 +57,15 @@ export function paginate(input: PaginateInput): PagePlan[] {
   const chrome = (variant: Variant): number =>
     input.footerHeight +
     options.safety +
-    (variant === "first" ? input.headerHeight.first + input.introHeight : input.headerHeight.continuation)
+    (variant === "first"
+      ? input.headerHeight.first + input.introHeight
+      : input.headerHeight.continuation)
   const rowsCapacity = (variant: Variant): number =>
     input.contentHeight - chrome(variant) - input.tableHeadHeight
   const reserveFor = (unit: Unit | undefined): number =>
-    unit && !unit.isFirstInGroup ? (input.continuedHeight[unit.groupId] ?? 0) : 0
+    unit && !unit.isFirstInGroup
+      ? (input.continuedHeight[unit.groupId] ?? 0)
+      : 0
 
   for (const unit of units) {
     if (unit.height + reserveFor(unit) > rowsCapacity("continuation") + EPS) {
@@ -70,8 +74,13 @@ export function paginate(input: PaginateInput): PagePlan[] {
       )
     }
   }
-  if (input.terminalHeight > input.contentHeight - chrome("continuation") + EPS) {
-    throw new PaginationError(`The totals block (${input.terminalHeight}px) is taller than an empty page`)
+  if (
+    input.terminalHeight >
+    input.contentHeight - chrome("continuation") + EPS
+  ) {
+    throw new PaginationError(
+      `The totals block (${input.terminalHeight}px) is taller than an empty page`
+    )
   }
 
   const openPage = (variant: Variant, first?: Unit): DraftPage => {
@@ -98,7 +107,10 @@ export function paginate(input: PaginateInput): PagePlan[] {
 
   const last = pages[pages.length - 1] as DraftPage
   const free =
-    input.contentHeight - chrome(last.variant) - (last.units.length > 0 ? input.tableHeadHeight : 0) - last.used
+    input.contentHeight -
+    chrome(last.variant) -
+    (last.units.length > 0 ? input.tableHeadHeight : 0) -
+    last.used
   if (input.terminalHeight <= free + EPS) {
     last.hasTerminal = true
   } else {
@@ -125,7 +137,10 @@ function moveTailWithTerminal(
   reserveFor: (unit: Unit | undefined) => number
 ): void {
   const all = pages.flatMap((p) => p.units)
-  const wanted = Math.min(Math.max(1, input.options.keepLastRowsWithTerminal), all.length)
+  const wanted = Math.min(
+    Math.max(1, input.options.keepLastRowsWithTerminal),
+    all.length
+  )
   const available =
     input.contentHeight -
     input.footerHeight -
@@ -162,5 +177,11 @@ function moveTailWithTerminal(
   }
 
   // Even one row plus the totals does not fit: the totals go alone on a final page.
-  pages.push({ variant: "continuation", units: [], continuedGroupId: null, used: 0, hasTerminal: true })
+  pages.push({
+    variant: "continuation",
+    units: [],
+    continuedGroupId: null,
+    used: 0,
+    hasTerminal: true,
+  })
 }

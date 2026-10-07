@@ -1,7 +1,16 @@
 import { useCallback, useMemo } from "react"
 import { useSearchParams } from "react-router"
 
-export const FILTER_KEYS = ["q", "status", "clientId", "profileId", "currency", "from", "to", "sort"] as const
+export const FILTER_KEYS = [
+  "q",
+  "status",
+  "clientId",
+  "profileId",
+  "currency",
+  "from",
+  "to",
+  "sort",
+] as const
 export type FilterKey = (typeof FILTER_KEYS)[number]
 
 /** All list state lives in the URL query string, so a filtered list can be bookmarked and shared. */
@@ -34,7 +43,16 @@ export function useListParams() {
     [setSearch]
   )
 
-  const clear = useCallback(() => set(Object.fromEntries(FILTER_KEYS.map((k) => [k, undefined]))), [set])
+  const clear = useCallback(
+    () => set(Object.fromEntries(FILTER_KEYS.map((k) => [k, undefined]))),
+    [set]
+  )
 
-  return { filters, search, set, clear, hasFilters: Object.keys(filters).length > 0 }
+  return {
+    filters,
+    search,
+    set,
+    clear,
+    hasFilters: Object.keys(filters).length > 0,
+  }
 }

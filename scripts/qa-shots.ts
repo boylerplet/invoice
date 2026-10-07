@@ -9,7 +9,16 @@ import { launchBrowser } from "./browser"
 
 const BASE = process.env.QA_BASE ?? "http://localhost:5173"
 const routes = process.argv.slice(2)
-const targets = routes.length > 0 ? routes : ["/", "/invoices", "/clients", "/settings/business", "/settings/numbering"]
+const targets =
+  routes.length > 0
+    ? routes
+    : [
+        "/",
+        "/invoices",
+        "/clients",
+        "/settings/business",
+        "/settings/numbering",
+      ]
 
 const outDir = resolve(".qa-shots")
 mkdirSync(outDir, { recursive: true })
@@ -25,8 +34,14 @@ try {
     await page.goto(`${BASE}${route}`)
     await page.waitForLoadState("networkidle")
     await page.waitForTimeout(400)
-    const name = route === "/" ? "dashboard" : route.replace(/^\//, "").replace(/[/?=&]/g, "-")
-    await page.screenshot({ path: resolve(outDir, `${name}.png`), fullPage: true })
+    const name =
+      route === "/"
+        ? "dashboard"
+        : route.replace(/^\//, "").replace(/[/?=&]/g, "-")
+    await page.screenshot({
+      path: resolve(outDir, `${name}.png`),
+      fullPage: true,
+    })
     console.log(`saved ${name}.png`)
   }
 } finally {

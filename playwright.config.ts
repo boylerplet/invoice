@@ -10,7 +10,9 @@ export default defineConfig({
   reporter: [["list"]],
   use: {
     baseURL: "http://localhost:5174",
-    ...(executablePath ? { launchOptions: { executablePath } } : { channel: "msedge" as const }),
+    ...(executablePath
+      ? { launchOptions: { executablePath } }
+      : { channel: "msedge" as const }),
   },
   webServer: {
     command: "pnpm e2e:server",

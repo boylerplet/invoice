@@ -1,6 +1,7 @@
 import { formatDate, formatMoney, type CurrencyCode } from "@workspace/shared"
 
-export const money = (minor: number, currency: CurrencyCode) => formatMoney(minor, currency, { decimals: "always" })
+export const money = (minor: number, currency: CurrencyCode) =>
+  formatMoney(minor, currency, { decimals: "always" })
 export const shortDate = (iso: string | null) => (iso ? formatDate(iso) : "—")
 
 export function relativeTime(iso: string, now = new Date()): string {

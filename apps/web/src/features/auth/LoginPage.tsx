@@ -2,7 +2,13 @@ import { useQueryClient } from "@tanstack/react-query"
 import { useState, type FormEvent } from "react"
 import { Navigate, useNavigate } from "react-router"
 import { Button } from "@workspace/ui/components/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@workspace/ui/components/card"
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@workspace/ui/components/card"
 import { Input } from "@workspace/ui/components/input"
 import { Label } from "@workspace/ui/components/label"
 import { api, ApiError } from "@/lib/api"
@@ -23,7 +29,10 @@ export function LoginPage() {
     setBusy(true)
     setError(null)
     try {
-      await api.post("/auth/login", { username: form.get("username"), password: form.get("password") })
+      await api.post("/auth/login", {
+        username: form.get("username"),
+        password: form.get("password"),
+      })
       await queryClient.invalidateQueries({ queryKey: keys.me })
       navigate("/", { replace: true })
     } catch (e) {
@@ -34,7 +43,7 @@ export function LoginPage() {
   }
 
   return (
-    <main className="bg-muted/40 flex min-h-svh items-center justify-center p-4">
+    <main className="flex min-h-svh items-center justify-center bg-muted/40 p-4">
       <Card className="w-full max-w-sm">
         <CardHeader>
           <CardTitle className="text-xl">Invoice Studio</CardTitle>
@@ -44,14 +53,26 @@ export function LoginPage() {
           <form onSubmit={onSubmit} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="username">Username</Label>
-              <Input id="username" name="username" autoComplete="username" autoFocus required />
+              <Input
+                id="username"
+                name="username"
+                autoComplete="username"
+                autoFocus
+                required
+              />
             </div>
             <div className="space-y-2">
               <Label htmlFor="password">Password</Label>
-              <Input id="password" name="password" type="password" autoComplete="current-password" required />
+              <Input
+                id="password"
+                name="password"
+                type="password"
+                autoComplete="current-password"
+                required
+              />
             </div>
             {error && (
-              <p role="alert" className="text-destructive text-sm">
+              <p role="alert" className="text-sm text-destructive">
                 {error}
               </p>
             )}

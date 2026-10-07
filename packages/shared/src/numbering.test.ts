@@ -55,8 +55,12 @@ describe("period keys and allocation", () => {
   })
   it("starts at startNumber and continues", () => {
     expect(
-      allocateNumber(withOver({ startNumber: 50 }), "2026-01-01", 0, () => false)
-        .counter
+      allocateNumber(
+        withOver({ startNumber: 50 }),
+        "2026-01-01",
+        0,
+        () => false
+      ).counter
     ).toBe(50)
     expect(allocateNumber(S, "2026-01-01", 4, () => false).number).toBe(
       "INV-2026-0005"

@@ -6,7 +6,16 @@
  * licence in fonts/LICENSES.md and prints the FontFaceDef[] snippet for a manifest.
  */
 import { execFileSync } from "node:child_process"
-import { appendFileSync, copyFileSync, existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, writeFileSync } from "node:fs"
+import {
+  appendFileSync,
+  copyFileSync,
+  existsSync,
+  mkdirSync,
+  mkdtempSync,
+  readFileSync,
+  readdirSync,
+  writeFileSync,
+} from "node:fs"
 import { tmpdir } from "node:os"
 import { basename, dirname, extname, join, resolve } from "node:path"
 import { fileURLToPath } from "node:url"
@@ -35,24 +44,42 @@ function parseArgs(argv: string[]): Record<string, string> {
   return out
 }
 
-const slug = (family: string) => family.toLowerCase().replace(/[^a-z0-9]+/g, "-")
+const slug = (family: string) =>
+  family.toLowerCase().replace(/[^a-z0-9]+/g, "-")
 
 function record(family: string, license: string, source: string): void {
-  if (!OPEN.has(license)) console.warn(`WARNING: licence "${license}" is not OFL-1.1 or Apache-2.0. Check it permits embedding.`)
+  if (!OPEN.has(license))
+    console.warn(
+      `WARNING: licence "${license}" is not OFL-1.1 or Apache-2.0. Check it permits embedding.`
+    )
   mkdirSync(FONTS_DIR, { recursive: true })
-  if (!existsSync(LICENSES)) writeFileSync(LICENSES, "# Font licences\n\n| Family | Licence | Source |\n|---|---|---|\n")
+  if (!existsSync(LICENSES))
+    writeFileSync(
+      LICENSES,
+      "# Font licences\n\n| Family | Licence | Source |\n|---|---|---|\n"
+    )
   if (!readFileSync(LICENSES, "utf8").includes(`| ${family} |`)) {
     appendFileSync(LICENSES, `| ${family} | ${license} | ${source} |\n`)
   }
 }
 
-function fromFontsource(family: string, weights: number[], subsets: string[]): FaceSnippet[] {
+function fromFontsource(
+  family: string,
+  weights: number[],
+  subsets: string[]
+): FaceSnippet[] {
   const tmp = mkdtempSync(join(tmpdir(), "fontsource-"))
   const base = slug(family)
   let pkg = `@fontsource-variable/${base}`
   let variable = true
   const pack = (name: string) =>
-    execFileSync("npm", ["pack", name, "--pack-destination", tmp, "--silent"], { encoding: "utf8", shell: true }).trim().split(/\r?\n/).pop() ?? ""
+    execFileSync("npm", ["pack", name, "--pack-destination", tmp, "--silent"], {
+      encoding: "utf8",
+      shell: true,
+    })
+      .trim()
+      .split(/\r?\n/)
+      .pop() ?? ""
   let tarball: string
   try {
     tarball = pack(pkg)
@@ -63,7 +90,9 @@ function fromFontsource(family: string, weights: number[], subsets: string[]): F
   }
   execFileSync("tar", ["-xzf", tarball], { cwd: tmp })
   const root = join(tmp, "package")
-  const meta = JSON.parse(readFileSync(join(root, "package.json"), "utf8")) as { license?: string }
+  const meta = JSON.parse(readFileSync(join(root, "package.json"), "utf8")) as {
+    license?: string
+  }
   const license = meta.license ?? "Other"
   const outDir = join(FONTS_DIR, base)
   mkdirSync(outDir, { recursive: true })
@@ -78,9 +107,13 @@ function fromFontsource(family: string, weights: number[], subsets: string[]): F
       if (!url) continue
       const subset = subsets.find((s) => url.includes(`-${s}-`))
       if (!subset) continue
-      const style = /font-style:\s*(\w+)/.exec(block)?.[1] === "italic" ? "italic" : "normal"
+      const style =
+        /font-style:\s*(\w+)/.exec(block)?.[1] === "italic"
+          ? "italic"
+          : "normal"
       if (variable && style === "italic") continue
-      const weightText = /font-weight:\s*([\d\s]+)/.exec(block)?.[1]?.trim() ?? "400"
+      const weightText =
+        /font-weight:\s*([\d\s]+)/.exec(block)?.[1]?.trim() ?? "400"
       const [lo, hi] = weightText.split(/\s+/).map(Number)
       copyFileSync(join(root, "files", url), join(outDir, url))
       faces.push({
@@ -95,18 +128,30 @@ function fromFontsource(family: string, weights: number[], subsets: string[]): F
     }
   }
   for (const name of ["LICENSE", "LICENSE.md", "LICENSE.txt"]) {
-    if (existsSync(join(root, name))) copyFileSync(join(root, name), join(outDir, "LICENSE.txt"))
+    if (existsSync(join(root, name)))
+      copyFileSync(join(root, name), join(outDir, "LICENSE.txt"))
   }
   record(family, license, source)
   return faces
 }
 
 const WEIGHT_WORDS: [RegExp, number][] = [
-  [/thin/i, 100], [/extralight|ultralight/i, 200], [/light/i, 300], [/medium/i, 500],
-  [/semibold|demibold/i, 600], [/extrabold|ultrabold/i, 800], [/black|heavy/i, 900], [/bold/i, 700],
+  [/thin/i, 100],
+  [/extralight|ultralight/i, 200],
+  [/light/i, 300],
+  [/medium/i, 500],
+  [/semibold|demibold/i, 600],
+  [/extrabold|ultrabold/i, 800],
+  [/black|heavy/i, 900],
+  [/bold/i, 700],
 ]
 
-function fromZip(family: string, zipPath: string, license: string, url: string): FaceSnippet[] {
+function fromZip(
+  family: string,
+  zipPath: string,
+  license: string,
+  url: string
+): FaceSnippet[] {
   const files = unzipSync(new Uint8Array(readFileSync(zipPath)))
   const base = slug(family)
   const outDir = join(FONTS_DIR, base)
@@ -118,7 +163,14 @@ function fromZip(family: string, zipPath: string, license: string, url: string):
     const name = basename(path)
     writeFileSync(join(outDir, name), data)
     const weight = WEIGHT_WORDS.find(([re]) => re.test(name))?.[1] ?? 400
-    faces.push({ family, weight, style: /italic/i.test(name) ? "italic" : "normal", file: `${base}/${name}`, license, source: url })
+    faces.push({
+      family,
+      weight,
+      style: /italic/i.test(name) ? "italic" : "normal",
+      file: `${base}/${name}`,
+      license,
+      source: url,
+    })
   }
   record(family, license, url)
   return faces
@@ -127,7 +179,9 @@ function fromZip(family: string, zipPath: string, license: string, url: string):
 const args = parseArgs(process.argv.slice(2))
 const family = args.family
 if (!family || !args.source) {
-  console.error('Usage: pnpm fonts:add --family "Inter" --source fontsource [--weights 400,500] [--subsets latin,latin-ext]')
+  console.error(
+    'Usage: pnpm fonts:add --family "Inter" --source fontsource [--weights 400,500] [--subsets latin,latin-ext]'
+  )
   process.exit(1)
 }
 const faces =
@@ -138,7 +192,9 @@ const faces =
         (args.weights ?? "400,500,600,700").split(",").map(Number),
         (args.subsets ?? "latin,latin-ext").split(",")
       )
-console.log(`Added ${faces.length} font file(s) to ${join(FONTS_DIR, slug(family))}`)
+console.log(
+  `Added ${faces.length} font file(s) to ${join(FONTS_DIR, slug(family))}`
+)
 console.log("Paste into your manifest `fonts`:\n")
 console.log(JSON.stringify(faces, null, 2))
 console.log(`\nFiles: ${readdirSync(join(FONTS_DIR, slug(family))).join(", ")}`)

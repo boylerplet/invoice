@@ -1,4 +1,9 @@
-import { calculate, invoiceDocSchema, validateCalculation, type InvoiceDoc } from "@workspace/shared"
+import {
+  calculate,
+  invoiceDocSchema,
+  validateCalculation,
+  type InvoiceDoc,
+} from "@workspace/shared"
 import { useMemo } from "react"
 
 export interface DocIssues {
@@ -16,7 +21,8 @@ export function useDocIssues(doc: InvoiceDoc | null): DocIssues {
     const byPath: Record<string, string> = {}
     const parsed = invoiceDocSchema.safeParse(doc)
     if (!parsed.success) {
-      for (const issue of parsed.error.issues) byPath[issue.path.join(".")] ??= issue.message
+      for (const issue of parsed.error.issues)
+        byPath[issue.path.join(".")] ??= issue.message
     }
     const general = validateCalculation(calculate(doc))
     return { byPath, general, valid: parsed.success && general.length === 0 }

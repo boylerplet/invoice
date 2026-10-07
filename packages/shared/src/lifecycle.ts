@@ -64,7 +64,10 @@ export type AgingBucket = "notDue" | "1-30" | "31-60" | "61+"
 export const AGING_BUCKETS: AgingBucket[] = ["notDue", "1-30", "31-60", "61+"]
 
 /** Aging of an unpaid issued invoice; null when it is not outstanding. */
-export function agingBucket(inv: OverdueInput, today: string): AgingBucket | null {
+export function agingBucket(
+  inv: OverdueInput,
+  today: string
+): AgingBucket | null {
   if (inv.status !== "ISSUED") return null
   if (inv.dueDate === null || !isOverdue(inv, today)) return "notDue"
   const days = daysBetween(inv.dueDate, today)

@@ -3,7 +3,9 @@ import { unzipSync } from "fflate"
 import { describe, expect, it } from "vitest"
 import { clientInput, bootstrap, makeEnv, priced } from "./test-utils"
 
-const PNG = new Uint8Array([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0, 0, 0, 0])
+const PNG = new Uint8Array([
+  0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0, 0, 0, 0,
+])
 
 function logoForm(bytes: Uint8Array, name = "logo.png") {
   const form = new FormData()
@@ -16,11 +18,14 @@ describe("logo upload", () => {
     const env = makeEnv()
     const { api, profile } = await bootstrap(env)
     const send = (bytes: Uint8Array) =>
-      env.app.request(`http://localhost/api/issuer-profiles/${profile.id}/logo`, {
-        method: "POST",
-        headers: { cookie: api.cookie },
-        body: logoForm(bytes),
-      })
+      env.app.request(
+        `http://localhost/api/issuer-profiles/${profile.id}/logo`,
+        {
+          method: "POST",
+          headers: { cookie: api.cookie },
+          body: logoForm(bytes),
+        }
+      )
     const res = await send(PNG)
     expect(res.status).toBe(200)
     const body = (await res.json()) as { logoFile: string }
@@ -37,11 +42,14 @@ describe("logo upload", () => {
   it("rejects files by magic bytes, not by name", async () => {
     const env = makeEnv()
     const { api, profile } = await bootstrap(env)
-    const res = await env.app.request(`http://localhost/api/issuer-profiles/${profile.id}/logo`, {
-      method: "POST",
-      headers: { cookie: api.cookie },
-      body: logoForm(new TextEncoder().encode("MZ not an image"), "evil.png"),
-    })
+    const res = await env.app.request(
+      `http://localhost/api/issuer-profiles/${profile.id}/logo`,
+      {
+        method: "POST",
+        headers: { cookie: api.cookie },
+        body: logoForm(new TextEncoder().encode("MZ not an image"), "evil.png"),
+      }
+    )
     expect(res.status).toBe(415)
   })
 
@@ -49,14 +57,21 @@ describe("logo upload", () => {
     const env = makeEnv()
     const { api, profile } = await bootstrap(env)
     const post = (bytes: Uint8Array) =>
-      env.app.request(`http://localhost/api/issuer-profiles/${profile.id}/logo`, {
-        method: "POST",
-        headers: { cookie: api.cookie },
-        body: logoForm(bytes, "x.svg"),
-      })
-    const bad = new TextEncoder().encode('<svg xmlns="http://www.w3.org/2000/svg"><script>alert(1)</script></svg>')
+      env.app.request(
+        `http://localhost/api/issuer-profiles/${profile.id}/logo`,
+        {
+          method: "POST",
+          headers: { cookie: api.cookie },
+          body: logoForm(bytes, "x.svg"),
+        }
+      )
+    const bad = new TextEncoder().encode(
+      '<svg xmlns="http://www.w3.org/2000/svg"><script>alert(1)</script></svg>'
+    )
     expect((await post(bad)).status).toBe(415)
-    const good = new TextEncoder().encode('<svg xmlns="http://www.w3.org/2000/svg"><rect width="4" height="4"/></svg>')
+    const good = new TextEncoder().encode(
+      '<svg xmlns="http://www.w3.org/2000/svg"><rect width="4" height="4"/></svg>'
+    )
     expect((await post(good)).status).toBe(200)
     const big = new Uint8Array(2 * 1024 * 1024 + 1)
     big.set(PNG)
@@ -68,7 +83,9 @@ describe("clients and profiles", () => {
   it("validates input with field errors", async () => {
     const env = makeEnv()
     const { api } = await bootstrap(env)
-    const res = await api.json<{ error: { code: string; fields: Record<string, string> } }>("POST", "/clients", {
+    const res = await api.json<{
+      error: { code: string; fields: Record<string, string> }
+    }>("POST", "/clients", {
       ...clientInput(),
       name: "",
     })
@@ -80,7 +97,11 @@ describe("clients and profiles", () => {
     const env = makeEnv()
     const a = await bootstrap(env)
     const b = await bootstrap(env, "other", "Other")
-    const res = await b.api.json("POST", "/clients", clientInput({ defaultIssuerProfileId: a.profile.id }))
+    const res = await b.api.json(
+      "POST",
+      "/clients",
+      clientInput({ defaultIssuerProfileId: a.profile.id })
+    )
     expect(res.status).toBe(422)
   })
 
@@ -98,24 +119,55 @@ describe("clients and profiles", () => {
       defaultPaymentAccountId: null,
       isDefault: true,
     })
-    const list = await api.json<{ id: string; isDefault: boolean }[]>("GET", "/issuer-profiles")
-    expect(list.body.filter((p) => p.isDefault).map((p) => p.id)).toEqual([second.body.id])
+    const list = await api.json<{ id: string; isDefault: boolean }[]>(
+      "GET",
+      "/issuer-profiles"
+    )
+    expect(list.body.filter((p) => p.isDefault).map((p) => p.id)).toEqual([
+      second.body.id,
+    ])
     await api.json("POST", `/issuer-profiles/${profile.id}/archive`)
-    expect((await api.json<unknown[]>("GET", "/issuer-profiles")).body).toHaveLength(1)
+    expect(
+      (await api.json<unknown[]>("GET", "/issuer-profiles")).body
+    ).toHaveLength(1)
   })
 
   it("updates workspace settings and numbering preview", async () => {
     const env = makeEnv()
     const { api } = await bootstrap(env)
-    const ws = (await api.json<{ name: string; timezone: string; settings: Record<string, unknown> }>("GET", "/workspace")).body
+    const ws = (
+      await api.json<{
+        name: string
+        timezone: string
+        settings: Record<string, unknown>
+      }>("GET", "/workspace")
+    ).body
     const updated = await api.json("PUT", "/workspace", {
       ...ws,
-      settings: { ...ws.settings, numbering: { prefix: "ACME", separator: "/", period: "financial", fyStartMonth: 4, padding: 3, startNumber: 1, resetEachPeriod: true } },
+      settings: {
+        ...ws.settings,
+        numbering: {
+          prefix: "ACME",
+          separator: "/",
+          period: "financial",
+          fyStartMonth: 4,
+          padding: 3,
+          startNumber: 1,
+          resetEachPeriod: true,
+        },
+      },
     })
     expect(updated.status).toBe(200)
-    const preview = await api.json<{ number: string }>("POST", "/invoices/next-number-preview", { date: "2026-03-31" })
+    const preview = await api.json<{ number: string }>(
+      "POST",
+      "/invoices/next-number-preview",
+      { date: "2026-03-31" }
+    )
     expect(preview.body.number).toBe("ACME/25-26/001")
-    const bad = await api.json("PUT", "/workspace", { ...ws, timezone: "Nowhere/Land" })
+    const bad = await api.json("PUT", "/workspace", {
+      ...ws,
+      timezone: "Nowhere/Land",
+    })
     expect(bad.status).toBe(422)
   })
 })
@@ -125,11 +177,17 @@ describe("dashboard, client summary and activity", () => {
     const env = makeEnv("2026-06-30T10:00:00Z")
     const { api, customer } = await bootstrap(env)
     const make = async (rate: number, dueDate: string, pay = false) => {
-      const created = await api.json<{ id: string; doc: Parameters<typeof priced>[0] }>("POST", "/invoices", { clientId: customer.id })
+      const created = await api.json<{
+        id: string
+        doc: Parameters<typeof priced>[0]
+      }>("POST", "/invoices", { clientId: customer.id })
       const doc = { ...priced(created.body.doc, rate), dueDate }
       await api.json("PUT", `/invoices/${created.body.id}`, { doc })
       await api.json("POST", `/invoices/${created.body.id}/issue`)
-      if (pay) await api.json("POST", `/invoices/${created.body.id}/pay`, { paidDate: "2026-06-10" })
+      if (pay)
+        await api.json("POST", `/invoices/${created.body.id}/pay`, {
+          paidDate: "2026-06-10",
+        })
     }
     await make(100_000, "2026-07-15")
     await make(200_000, "2026-06-20")
@@ -138,7 +196,21 @@ describe("dashboard, client summary and activity", () => {
     await make(1_600_000, "2026-06-01", true)
     await api.json("POST", "/invoices", { clientId: customer.id })
 
-    const dash = (await api.json<{ currencies: { currency: string; outstandingMinor: number; overdueMinor: number; overdueCount: number; paidThisMonthMinor: number; paidThisYearMinor: number; draftsCount: number; aging: Record<string, { amountMinor: number; count: number }>; topClients: { outstandingMinor: number }[] }[] }>("GET", "/dashboard")).body
+    const dash = (
+      await api.json<{
+        currencies: {
+          currency: string
+          outstandingMinor: number
+          overdueMinor: number
+          overdueCount: number
+          paidThisMonthMinor: number
+          paidThisYearMinor: number
+          draftsCount: number
+          aging: Record<string, { amountMinor: number; count: number }>
+          topClients: { outstandingMinor: number }[]
+        }[]
+      }>("GET", "/dashboard")
+    ).body
     expect(dash.currencies).toHaveLength(1)
     const inr = dash.currencies[0]!
     expect(inr.outstandingMinor).toBe(1_500_000)
@@ -153,9 +225,22 @@ describe("dashboard, client summary and activity", () => {
     expect(inr.aging["61+"]?.amountMinor).toBe(800_000)
     expect(inr.topClients[0]?.outstandingMinor).toBe(1_500_000)
 
-    const summary = await api.json<{ invoiceCount: number; byCurrency: { INR?: { billedMinor: number; paidMinor: number; outstandingMinor: number } } }>("GET", `/clients/${customer.id}/summary`)
+    const summary = await api.json<{
+      invoiceCount: number
+      byCurrency: {
+        INR?: {
+          billedMinor: number
+          paidMinor: number
+          outstandingMinor: number
+        }
+      }
+    }>("GET", `/clients/${customer.id}/summary`)
     expect(summary.body.invoiceCount).toBe(6)
-    expect(summary.body.byCurrency.INR).toEqual({ billedMinor: 3_100_000, paidMinor: 1_600_000, outstandingMinor: 1_500_000 })
+    expect(summary.body.byCurrency.INR).toEqual({
+      billedMinor: 3_100_000,
+      paidMinor: 1_600_000,
+      outstandingMinor: 1_500_000,
+    })
   })
 
   it("logs activity and pages it", async () => {
@@ -165,8 +250,13 @@ describe("dashboard, client summary and activity", () => {
       env.clock.now = new Date(env.clock.now.getTime() + 1000)
       await api.json("POST", "/invoices", { clientId: customer.id })
     }
-    const page = await api.json<{ rows: { type: string }[]; next: string | null }>("GET", "/activity")
-    expect(page.body.rows.filter((r) => r.type === "invoice.created")).toHaveLength(3)
+    const page = await api.json<{
+      rows: { type: string }[]
+      next: string | null
+    }>("GET", "/activity")
+    expect(
+      page.body.rows.filter((r) => r.type === "invoice.created")
+    ).toHaveLength(3)
     expect(page.body.rows.some((r) => r.type === "client.created")).toBe(true)
     expect(page.body.next).toBeNull()
   })
@@ -176,11 +266,14 @@ describe("backup", () => {
   it("exports JSON without password hashes and a zip with uploads", async () => {
     const env = makeEnv()
     const { api, profile } = await bootstrap(env)
-    await env.app.request(`http://localhost/api/issuer-profiles/${profile.id}/logo`, {
-      method: "POST",
-      headers: { cookie: api.cookie },
-      body: logoForm(PNG),
-    })
+    await env.app.request(
+      `http://localhost/api/issuer-profiles/${profile.id}/logo`,
+      {
+        method: "POST",
+        headers: { cookie: api.cookie },
+        body: logoForm(PNG),
+      }
+    )
     const json = await api.request("GET", "/export/backup?format=json")
     const text = await json.text()
     expect(text).not.toContain("passwordHash")

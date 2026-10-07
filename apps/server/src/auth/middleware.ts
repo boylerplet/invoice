@@ -19,15 +19,17 @@ export function requireAuth(deps: Deps) {
 const SAFE_METHODS = new Set(["GET", "HEAD", "OPTIONS"])
 
 /** CSRF defence on top of SameSite=Lax: a mutating request's Origin must match Host. */
-export const originCheck = createMiddleware(async (c, next) => {
-  if (!SAFE_METHODS.has(c.req.method)) {
-    const origin = c.req.header("origin")
-    if (origin) {
-      const host = c.req.header("host")
-      if (!host || new URL(origin).host !== host) {
-        throw new ApiError(403, "BAD_ORIGIN", "Cross-origin request blocked")
+export function originCheck(deps: Deps) {
+  return createMiddleware(async (c, next) => {
+    if (!SAFE_METHODS.has(c.req.method)) {
+      const origin = c.req.header("origin")
+      if (origin && !deps.config.allowedOrigins.includes(origin)) {
+        const host = c.req.header("host")
+        if (!host || new URL(origin).host !== host) {
+          throw new ApiError(403, "BAD_ORIGIN", "Cross-origin request blocked")
+        }
       }
     }
-  }
-  await next()
-})
+    await next()
+  })
+}

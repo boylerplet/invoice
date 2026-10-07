@@ -34,7 +34,7 @@ export function createApp(deps: Deps) {
   })
 
   const api = new Hono<AppEnv>()
-  api.use("*", originCheck)
+  api.use("*", originCheck(deps))
   api.get("/health", (c) => c.json({ ok: true }))
   api.route("/auth", authRoutes(deps))
 

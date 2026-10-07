@@ -16,6 +16,8 @@ export interface Config {
   defaultTimezone: string
   /** Built web app, served in production when it exists. */
   webDist: string
+  /** Extra Origins accepted on mutating requests (the Vite dev server proxies with its own Host). */
+  allowedOrigins: string[]
 }
 
 const REPO_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "../../..")
@@ -41,6 +43,7 @@ function loadSecrets(dataDir: string): Secrets {
 }
 
 export function loadConfig(): Config {
+  const webPort = process.env.WEB_PORT ?? "5173"
   const configured = process.env.DATA_DIR
   const dataDir = configured
     ? isAbsolute(configured)
@@ -61,5 +64,9 @@ export function loadConfig(): Config {
     puppeteerExecutablePath: process.env.PUPPETEER_EXECUTABLE_PATH || null,
     defaultTimezone: process.env.DEFAULT_TIMEZONE || "Asia/Kolkata",
     webDist: join(REPO_ROOT, "apps/web/dist"),
+    allowedOrigins:
+      process.env.NODE_ENV === "production"
+        ? []
+        : [`http://localhost:${webPort}`, `http://127.0.0.1:${webPort}`],
   }
 }

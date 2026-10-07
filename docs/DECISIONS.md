@@ -29,3 +29,5 @@ One line per decision: what + why. Newest at the bottom.
 - Template lab "page boxes" overlay shows page body and block outlines (no numeric heights). Dev routes (`/dev/templates/:id`, `/dev/registry`, `/print/fixture/:scenario`) exist only when `import.meta.env.DEV`.
 - `template:shots` and the Playwright suites drive the installed Edge via Playwright (`channel: msedge`) or `PUPPETEER_EXECUTABLE_PATH`; the dev server is addressed as `localhost` (Vite binds IPv6 localhost).
 - Template 01 footer wraps instead of truncating (fixed 9 mm height, two 7.5pt lines fit).
+- E2E runs against an isolated server (`pnpm e2e:server`: DATA_DIR `.e2e-data`, API 3002, web 5174, reset + seeded per run). `tsx watch` exits when stdin is closed (as under Playwright), so the e2e scripts use plain `tsx`.
+- In development the server accepts mutating requests from the Vite origin (`WEB_PORT`) because Vite's proxy rewrites Host; in production only same-host Origins pass.

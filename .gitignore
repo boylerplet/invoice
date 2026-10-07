@@ -38,3 +38,5 @@ data/
 !.env.example
 test-results/
 playwright-report/
+.qa-shots/
+.e2e-data/

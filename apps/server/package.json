@@ -5,10 +5,11 @@
   "type": "module",
   "scripts": {
     "dev": "tsx watch src/index.ts",
-    "start": "tsx src/index.ts",
+    "start": "cross-env NODE_ENV=production tsx src/index.ts",
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run"
+    "test": "vitest run",
+    "e2e": "tsx src/index.ts"
   },
   "dependencies": {
     "@hono/node-server": "^2.1.3",
@@ -27,6 +28,7 @@
     "@types/better-sqlite3": "^9.6.0",
     "@types/big.js": "^7.0.0",
     "@types/node": "^24.19.1",
+    "cross-env": "^10.1.0",
     "drizzle-kit": "^0.31.11",
     "eslint": "^10.12.0",
     "globals": "^17.13.0",

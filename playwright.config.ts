@@ -9,13 +9,15 @@ export default defineConfig({
   workers: 1,
   reporter: [["list"]],
   use: {
-    baseURL: "http://localhost:5173",
+    baseURL: "http://localhost:5174",
     ...(executablePath ? { launchOptions: { executablePath } } : { channel: "msedge" as const }),
   },
   webServer: {
-    command: "pnpm dev",
-    url: "http://localhost:5173",
-    reuseExistingServer: true,
+    command: "pnpm e2e:server",
+    url: "http://localhost:5174",
+    reuseExistingServer: false,
     timeout: 120_000,
+    stdout: "pipe",
+    stderr: "pipe",
   },
 })

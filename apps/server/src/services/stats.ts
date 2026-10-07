@@ -2,33 +2,19 @@ import {
   agingBucket,
   isOverdue,
   todayIn,
-  type AgingBucket,
+  type AgingBucketsDto,
+  type ClientSummaryDto,
   type CurrencyCode,
+  type CurrencyDashboardDto,
+  type DashboardDto,
   type NumberingSettings,
 } from "@workspace/shared"
-import { invoicesRepo, type InvoiceListRow } from "../repos/invoices"
+import { invoicesRepo } from "../repos/invoices"
 import { workspacesRepo } from "../repos/workspaces"
 import type { Deps } from "../http/types"
 import { notFound } from "../http/errors"
 
-export interface CurrencyTotals {
-  billedMinor: number
-  paidMinor: number
-  outstandingMinor: number
-}
-
-export interface ClientSummary {
-  clientId: string
-  invoiceCount: number
-  lastInvoiceDate: string | null
-  byCurrency: Partial<Record<CurrencyCode, CurrencyTotals>>
-}
-
-interface Bucket {
-  amountMinor: number
-  count: number
-}
-type Buckets = Record<AgingBucket, Bucket>
+type Buckets = AgingBucketsDto
 
 const emptyBuckets = (): Buckets => ({
   notDue: { amountMinor: 0, count: 0 },
@@ -37,26 +23,6 @@ const emptyBuckets = (): Buckets => ({
   "61+": { amountMinor: 0, count: 0 },
 })
 
-export interface CurrencyDashboard {
-  currency: CurrencyCode
-  outstandingMinor: number
-  overdueMinor: number
-  overdueCount: number
-  paidThisMonthMinor: number
-  paidThisYearMinor: number
-  draftsCount: number
-  aging: Buckets
-  agingByClient: { clientId: string; clientName: string; buckets: Buckets }[]
-  topClients: { clientId: string; clientName: string; outstandingMinor: number }[]
-}
-
-export interface Dashboard {
-  today: string
-  yearLabel: string
-  yearStart: string
-  currencies: CurrencyDashboard[]
-  recent: InvoiceListRow[]
-}
 
 /** Start of the reporting year: the financial year when numbering is financial, else calendar. */
 export function yearStartFor(numbering: NumberingSettings, today: string): string {
@@ -70,8 +36,8 @@ export function yearStartFor(numbering: NumberingSettings, today: string): strin
 
 export function createStatsService(deps: Deps) {
   return {
-    clientSummaries(ws: string): Map<string, ClientSummary> {
-      const result = new Map<string, ClientSummary>()
+    clientSummaries(ws: string): Map<string, ClientSummaryDto> {
+      const result = new Map<string, ClientSummaryDto>()
       for (const row of invoicesRepo(deps.db).listLive(ws)) {
         const summary = result.get(row.clientId) ?? {
           clientId: row.clientId,
@@ -98,7 +64,7 @@ export function createStatsService(deps: Deps) {
       return result
     },
 
-    clientSummary(ws: string, clientId: string): ClientSummary {
+    clientSummary(ws: string, clientId: string): ClientSummaryDto {
       return (
         this.clientSummaries(ws).get(clientId) ?? {
           clientId,
@@ -109,17 +75,17 @@ export function createStatsService(deps: Deps) {
       )
     },
 
-    dashboard(ws: string): Dashboard {
+    dashboard(ws: string): DashboardDto {
       const workspace = workspacesRepo(deps.db).get(ws)
       if (!workspace) throw notFound("Workspace")
       const today = todayIn(workspace.timezone, deps.now())
       const yearStart = yearStartFor(workspace.settings.numbering, today)
       const rows = invoicesRepo(deps.db).listLive(ws)
-      const byCurrency = new Map<CurrencyCode, CurrencyDashboard>()
+      const byCurrency = new Map<CurrencyCode, CurrencyDashboardDto>()
       const clientBuckets = new Map<string, Map<string, { name: string; buckets: Buckets }>>()
       const outstandingByClient = new Map<string, Map<string, { name: string; amount: number }>>()
 
-      const slot = (currency: CurrencyCode): CurrencyDashboard => {
+      const slot = (currency: CurrencyCode): CurrencyDashboardDto => {
         let entry = byCurrency.get(currency)
         if (!entry) {
           entry = {

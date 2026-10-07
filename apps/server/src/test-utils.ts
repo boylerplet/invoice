@@ -31,6 +31,7 @@ export function makeEnv(start = "2026-06-15T10:00:00Z"): TestEnv {
     puppeteerExecutablePath: null,
     defaultTimezone: "Asia/Kolkata",
     webDist: join(dataDir, "no-web"),
+    allowedOrigins: [],
   }
   const clock = { now: new Date(start) }
   const db = openDb(":memory:")

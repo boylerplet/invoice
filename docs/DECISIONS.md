@@ -10,3 +10,5 @@ One line per decision: what + why. Newest at the bottom.
 - pnpm 12 blocks build scripts by default; allowed via `allowBuilds` in `pnpm-workspace.yaml` (esbuild, better-sqlite3, @node-rs/argon2).
 - Server runs TypeScript directly through `tsx` in dev and prod (workspace packages are TS source); `pnpm build` builds the web app only.
 - The reference image lives at `docs/references/invoice-01.png` (user's folder name kept instead of `docs/reference/`).
+- InvoiceVM/RowVM types are defined in @workspace/shared (vm.ts) and re-exported by the templates contract, because templates depends on shared and shared builds the VM. Row money strings carry no currency symbol; only the total does (cleaner tables). Discounts use U+2212 minus.
+- Invoice items capped at 200, children at 20 per item, adjustments at 10 (form-level limits so pagination stays solvable).

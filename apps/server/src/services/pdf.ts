@@ -48,8 +48,26 @@ export interface PdfRenderer {
 }
 
 /** Keeps one warm browser; every request gets its own page. */
+const IDLE_CLOSE_MS = 60_000
+
 export function createPdfRenderer(config: Config): PdfRenderer {
   let browser: Promise<Browser> | null = null
+  let idleTimer: NodeJS.Timeout | null = null
+
+  /** The warm browser is closed after a minute without exports, so no stray window lingers. */
+  function scheduleIdleClose() {
+    if (idleTimer) clearTimeout(idleTimer)
+    idleTimer = setTimeout(() => void closeBrowser(), IDLE_CLOSE_MS)
+    idleTimer.unref()
+  }
+
+  async function closeBrowser() {
+    if (idleTimer) clearTimeout(idleTimer)
+    idleTimer = null
+    const current = browser
+    browser = null
+    if (current) await (await current).close().catch(() => undefined)
+  }
 
   function launch(): Promise<Browser> {
     const executablePath = findBrowser(config)
@@ -98,12 +116,9 @@ export function createPdfRenderer(config: Config): PdfRenderer {
         })
       } finally {
         await page.close().catch(() => undefined)
+        scheduleIdleClose()
       }
     },
-    async close() {
-      const current = browser
-      browser = null
-      if (current) await (await current).close().catch(() => undefined)
-    },
+    close: closeBrowser,
   }
 }

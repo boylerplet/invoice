@@ -1,11 +1,12 @@
 import { serve } from "@hono/node-server"
-import { Hono } from "hono"
+import { createApp } from "./app"
+import { loadConfig } from "./config"
+import { openDb } from "./db/client"
 
-const app = new Hono()
-app.get("/api/health", (c) => c.json({ ok: true }))
+const config = loadConfig()
+const db = openDb(config.dbFile)
+const app = createApp({ config, db, now: () => new Date() })
 
-const port = Number(process.env.PORT ?? 3001)
-const hostname = process.env.HOST ?? "127.0.0.1"
-serve({ fetch: app.fetch, port, hostname }, (info) => {
-  console.log(`server listening on http://${hostname}:${info.port}`)
+serve({ fetch: app.fetch, port: config.port, hostname: config.host }, (info) => {
+  console.log(`Invoice Studio listening on http://${config.host}:${info.port}`)
 })

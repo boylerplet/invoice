@@ -10,7 +10,10 @@
     "test:e2e": "playwright test",
     "typecheck": "pnpm -r typecheck",
     "lint": "pnpm -r lint",
-    "format": "prettier --write \"**/*.{ts,tsx,css,md}\""
+    "format": "prettier --write \"**/*.{ts,tsx,css,md}\"",
+    "db:migrate": "pnpm --filter server exec tsx src/cli/db-migrate.ts",
+    "db:reset": "pnpm --filter server exec tsx src/cli/db-reset.ts",
+    "user:create": "pnpm --filter server exec tsx src/cli/user-create.ts"
   },
   "devDependencies": {
     "@playwright/test": "^1.63.0",

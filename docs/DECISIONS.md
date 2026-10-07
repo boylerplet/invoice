@@ -12,3 +12,12 @@ One line per decision: what + why. Newest at the bottom.
 - The reference image lives at `docs/references/invoice-01.png` (user's folder name kept instead of `docs/reference/`).
 - InvoiceVM/RowVM types are defined in @workspace/shared (vm.ts) and re-exported by the templates contract, because templates depends on shared and shared builds the VM. Row money strings carry no currency symbol; only the total does (cleaner tables). Discounts use U+2212 minus.
 - Invoice items capped at 200, children at 20 per item, adjustments at 10 (form-level limits so pagination stays solvable).
+- Drafts are saved with a lenient schema (`invoiceDraftSchema`: calc-safe but may be incomplete); issuing and saving an ISSUED invoice use the strict `invoiceDocSchema` plus a non-negative-taxable check.
+- Invoices table also stores `clientName`, `issuerName`, `reference` (denormalised from the snapshot) so list/search never loads the data JSON.
+- Profiles, payment accounts and clients are archived (POST /:id/archive|unarchive), never hard-deleted, because invoices reference them.
+- `/uploads/*` is public (unguessable UUID file names, CSP sandbox header) so the print page can load logos without a cookie; the rest of the API needs a session.
+- SVG logos are rejected (not sanitised) if they contain script, event handlers, foreignObject, entities or external hrefs.
+- Usernames are stored lowercase (case-insensitive uniqueness). Passwords need 8+ characters (the demo seed's `demo1234` fits).
+- Backup ZIP includes every file in `data/uploads` (single-workspace deployment), plus `data.json` without password hashes.
+- Duplicating an invoice copies its snapshots as-is (does not refresh from client/profile) and allocates a number from today's period.
+- Server migrations are SQL files in `apps/server/drizzle`, generated with `pnpm --filter server exec drizzle-kit generate`, applied on every start.

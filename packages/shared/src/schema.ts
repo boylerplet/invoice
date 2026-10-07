@@ -56,65 +56,76 @@ export const childSchema = z.object({
   rate: minor.nullable(),
 })
 
-export const itemSchema = z
-  .object({
-    id: z.string(),
-    description: text(200),
-    detail: optText(300),
-    pricing: pricingSchema,
-    qty: qty.nullable(),
-    unit: optText(20),
-    rate: minor.nullable(),
-    children: z.array(childSchema).max(MAX_CHILDREN),
-  })
-  .superRefine((item, ctx) => {
-    if (item.pricing === "explicit" && item.rate === null) {
-      ctx.addIssue({ code: "custom", path: ["rate"], message: "Rate is required for a fixed amount" })
-    }
-    if (item.pricing === "rollup") {
-      item.children.forEach((child, i) => {
-        if (child.qty !== null && child.rate === null) {
-          ctx.addIssue({ code: "custom", path: ["children", i, "rate"], message: "A quantity needs a rate" })
-        }
-      })
-    }
-  })
+export const itemShape = z.object({
+  id: z.string(),
+  description: text(200),
+  detail: optText(300),
+  pricing: pricingSchema,
+  qty: qty.nullable(),
+  unit: optText(20),
+  rate: minor.nullable(),
+  children: z.array(childSchema).max(MAX_CHILDREN),
+})
+
+/** Rules that must hold before an invoice can be issued or saved as ISSUED. */
+export const itemSchema = itemShape.superRefine((item, ctx) => {
+  if (item.description.trim() === "") {
+    ctx.addIssue({ code: "custom", path: ["description"], message: "Describe this item" })
+  }
+  if (item.pricing === "explicit" && item.rate === null) {
+    ctx.addIssue({ code: "custom", path: ["rate"], message: "Rate is required for a fixed amount" })
+  }
+  if (item.pricing === "rollup") {
+    item.children.forEach((child, i) => {
+      if (child.qty !== null && child.rate === null) {
+        ctx.addIssue({ code: "custom", path: ["children", i, "rate"], message: "A quantity needs a rate" })
+      }
+    })
+  }
+})
 
 export const adjustmentSchema = z
   .object({
     id: z.string(),
-    label: text(80).min(1, "Required"),
+    label: text(80),
     kind: z.enum(["discount", "charge"]),
     valueType: z.enum(["fixed", "percent"]),
     value: z.string(),
   })
   .superRefine((adj, ctx) => {
-    const ok = adj.valueType === "fixed" ? /^\d{1,15}$/.test(adj.value) : isPercentString(adj.value)
+    const ok = adj.valueType === "fixed" ? /^[0-9]{1,15}$/.test(adj.value) : isPercentString(adj.value)
     if (!ok) ctx.addIssue({ code: "custom", path: ["value"], message: "Invalid value" })
   })
 
-export const invoiceDocSchema = z.object({
-  schemaVersion: z.literal(1),
-  type: z.literal("INVOICE"),
-  number: z.string().min(1).max(32).regex(/^[A-Za-z0-9/_-]+$/, "Letters, digits, / _ - only"),
-  issueDate: isoDate,
-  dueDate: isoDate.nullable(),
-  currency: currencySchema,
-  reference: optText(80),
-  paymentTerms: optText(200),
-  issuer: issuerSnapshotSchema,
-  client: clientSnapshotSchema,
-  payment: paymentSnapshotSchema.nullable(),
-  items: z.array(itemSchema).min(1, "Add at least one item").max(MAX_ITEMS),
-  adjustments: z.array(adjustmentSchema).max(10),
-  tax: z.object({ enabled: z.boolean(), label: text(40), rate: percent }),
-  notes: optText(800),
-  presentation: z.object({
-    templateId: z.string().min(1),
-    templateVersion: z.number().int().min(1),
-    paperSize: paperSizeSchema,
-  }),
-})
+function docShape<T extends z.ZodType>(items: T) {
+  return z.object({
+    schemaVersion: z.literal(1),
+    type: z.literal("INVOICE"),
+    number: z.string().min(1).max(32).regex(/^[A-Za-z0-9/_-]+$/, "Letters, digits, / _ - only"),
+    issueDate: isoDate,
+    dueDate: isoDate.nullable(),
+    currency: currencySchema,
+    reference: optText(80),
+    paymentTerms: optText(200),
+    issuer: issuerSnapshotSchema,
+    client: clientSnapshotSchema,
+    payment: paymentSnapshotSchema.nullable(),
+    items: z.array(items).min(1, "Add at least one item").max(MAX_ITEMS),
+    adjustments: z.array(adjustmentSchema).max(10),
+    tax: z.object({ enabled: z.boolean(), label: text(40), rate: percent }),
+    notes: optText(800),
+    presentation: z.object({
+      templateId: z.string().min(1),
+      templateVersion: z.number().int().min(1),
+      paperSize: paperSizeSchema,
+    }),
+  })
+}
+
+/** Strict: required to issue or save an ISSUED invoice. */
+export const invoiceDocSchema = docShape(itemSchema)
+/** Safe to calculate and store, but may still be incomplete (DRAFT autosave). */
+export const invoiceDraftSchema = docShape(itemShape)
 
 export type InvoiceStatus = z.infer<typeof statusSchema>
 export type Pricing = z.infer<typeof pricingSchema>
@@ -126,4 +137,4 @@ export type PaymentSnapshot = z.infer<typeof paymentSnapshotSchema>
 export type Child = z.infer<typeof childSchema>
 export type Item = z.infer<typeof itemSchema>
 export type Adjustment = z.infer<typeof adjustmentSchema>
-export type InvoiceDoc = z.infer<typeof invoiceDocSchema>
+export type InvoiceDoc = z.infer<typeof invoiceDraftSchema>

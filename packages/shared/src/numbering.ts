@@ -1,6 +1,6 @@
 export interface NumberingSettings {
   prefix: string
-  separator: string
+  separator: "-" | "/" | "_" | ""
   period: "calendar" | "financial" | "none"
   fyStartMonth: number
   padding: number

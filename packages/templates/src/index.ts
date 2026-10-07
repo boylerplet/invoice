@@ -8,3 +8,4 @@ export { useInvoiceLayout, type InvoiceLayout, type LayoutSnapshot } from "./lay
 export { visibleColumns } from "./layout/columns"
 export * from "../fixtures"
 export { templateThumbnail } from "./thumbnails"
+export { mmToPx, contentSizeMm } from "./layout/measure"

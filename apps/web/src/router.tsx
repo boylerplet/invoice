@@ -2,6 +2,9 @@ import { createBrowserRouter, Navigate } from "react-router"
 import { PageHeader } from "@/components/PageHeader"
 import { LoginPage } from "@/features/auth/LoginPage"
 import { RequireAuth } from "@/features/auth/RequireAuth"
+import { EditorPage } from "@/features/editor/EditorPage"
+import { HistoryPage } from "@/features/invoices/HistoryPage"
+import { NewInvoicePage } from "@/features/invoices/NewInvoicePage"
 import { ClientsPage } from "@/features/clients/ClientsPage"
 import { SettingsLayout } from "@/features/settings/SettingsLayout"
 import { FixturePrint } from "@/features/templates/FixturePrint"
@@ -29,6 +32,9 @@ export const router = createBrowserRouter([
     children: [
       { path: "/", element: <Later title="Dashboard" /> },
       { path: "/invoices", element: <Later title="Invoices" /> },
+      { path: "/invoices/new", element: <NewInvoicePage /> },
+      { path: "/invoices/:id", element: <EditorPage /> },
+      { path: "/invoices/:id/history", element: <HistoryPage /> },
       { path: "/clients", element: <ClientsPage /> },
       { path: "/clients/:id", element: <Later title="Client" /> },
       { path: "/activity", element: <Later title="Activity" /> },

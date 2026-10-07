@@ -184,7 +184,7 @@ export function buildInvoiceVM(
     total: formatMoney(calc.total, code, { decimals: moneyDecimals }),
     notes: supports.notes ? nonEmpty(doc.notes) : null,
     payment:
-      supports.paymentDetails && doc.payment
+      supports.paymentDetails && doc.payment && doc.payment.lines.length > 0
         ? { title: doc.payment.title, lines: doc.payment.lines }
         : null,
   }

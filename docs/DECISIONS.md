@@ -31,3 +31,9 @@ One line per decision: what + why. Newest at the bottom.
 - Template 01 footer wraps instead of truncating (fixed 9 mm height, two 7.5pt lines fit).
 - E2E runs against an isolated server (`pnpm e2e:server`: DATA_DIR `.e2e-data`, API 3002, web 5174, reset + seeded per run). `tsx watch` exits when stdin is closed (as under Playwright), so the e2e scripts use plain `tsx`.
 - In development the server accepts mutating requests from the Vite origin (`WEB_PORT`) because Vite's proxy rewrites Host; in production only same-host Origins pass.
+- The invoice editor keeps the draft document in a Zustand store and edits it with controlled inputs instead of React Hook Form: a deeply nested live document with per-keystroke preview (items, children, adjustments) fits a single store better; validation runs through the shared zod schema (`useDocIssues`). RHF + the same schemas is still used for all settings and client forms.
+- Inline validation in the editor appears after a failed "Mark as issued" attempt (and always for issued invoices), so brand-new blank items are not shown as errors.
+- Editor autosave: DRAFT saves 800 ms after the last change, never concurrently (one request in flight); after a failed save it waits for the next edit or the Retry link. Navigating away with unsaved draft edits flushes first; leaving an ISSUED invoice with unsaved edits asks.
+- Zoom is a CSS scale of the unchanged layout; layout runs once at 100% geometry. Fit width/page recompute from the viewport; the page indicator follows the scroll position.
+- Payment details are hidden from the view model when the chosen account has no lines (no empty "Payment details" heading).
+- "History" shows read-only previews of any revision; "Restore as new revision" is offered for ISSUED invoices and saves the old content as a new revision (note "Restored revision N").

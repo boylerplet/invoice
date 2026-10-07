@@ -18,6 +18,8 @@ export interface Config {
   webDist: string
   /** Extra Origins accepted on mutating requests (the Vite dev server proxies with its own Host). */
   allowedOrigins: string[]
+  /** Where the headless browser opens the print page: this server when the web app is built, else the Vite dev server. */
+  printBaseUrl: string
 }
 
 const REPO_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "../../..")
@@ -53,8 +55,10 @@ export function loadConfig(): Config {
   const uploadsDir = join(dataDir, "uploads")
   mkdirSync(uploadsDir, { recursive: true })
   const secrets = loadSecrets(dataDir)
+  const port = Number(process.env.PORT ?? 3001)
+  const webDist = join(REPO_ROOT, "apps/web/dist")
   return {
-    port: Number(process.env.PORT ?? 3001),
+    port,
     host: process.env.HOST ?? "127.0.0.1",
     dataDir,
     dbFile: join(dataDir, "invoice.db"),
@@ -63,7 +67,10 @@ export function loadConfig(): Config {
     cookieSecure: process.env.COOKIE_SECURE === "true",
     puppeteerExecutablePath: process.env.PUPPETEER_EXECUTABLE_PATH || null,
     defaultTimezone: process.env.DEFAULT_TIMEZONE || "Asia/Kolkata",
-    webDist: join(REPO_ROOT, "apps/web/dist"),
+    webDist,
+    printBaseUrl:
+      process.env.PRINT_BASE_URL ||
+      (existsSync(join(webDist, "index.html")) ? `http://127.0.0.1:${port}` : `http://localhost:${webPort}`),
     allowedOrigins:
       process.env.NODE_ENV === "production"
         ? []

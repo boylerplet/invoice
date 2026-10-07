@@ -14,7 +14,7 @@ import { Icon } from "@/components/Icon"
 import { StatusBadge } from "@/components/StatusBadge"
 import type { SaveState } from "./editorStore"
 
-export type HeaderAction = "issue" | "pay" | "cancel" | "reopen" | "duplicate" | "discard"
+export type HeaderAction = "export" | "issue" | "pay" | "cancel" | "reopen" | "duplicate" | "discard"
 
 interface EditorHeaderProps {
   detail: InvoiceDetailDto
@@ -60,7 +60,8 @@ export function EditorHeader(props: EditorHeaderProps) {
       <StatusBadge status={status} overdue={detail.isOverdue} />
       <SaveIndicator {...props} />
       <div className="flex-1" />
-      {status === "DRAFT" && <Button onClick={() => onAction("issue")}>Mark as issued</Button>}
+      <Button variant={status === "DRAFT" ? "default" : "outline"} onClick={() => onAction("export")}>Export PDF</Button>
+      {status === "DRAFT" && <Button variant="outline" onClick={() => onAction("issue")}>Mark as issued</Button>}
       {status === "ISSUED" && (
         <>
           <Button disabled={!dirty} onClick={onSave}>Save changes</Button>

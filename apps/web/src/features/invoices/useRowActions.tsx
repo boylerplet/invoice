@@ -2,6 +2,7 @@ import type { InvoiceListRowDto } from "@workspace/shared"
 import { useState, type ReactNode } from "react"
 import { useNavigate } from "react-router"
 import { toast } from "sonner"
+import { downloadFile } from "@/lib/download"
 import { useInvoiceAction } from "@/lib/invoiceQueries"
 import { CancelDialog, PayDialog, SimpleActionDialog } from "./InvoiceDialogs"
 import type { RowAction } from "./InvoiceTable"
@@ -17,6 +18,12 @@ export function useRowActions(today: string): { onAction: (action: RowAction, ro
     switch (action) {
       case "open":
         return void navigate(`/invoices/${row.id}`)
+      case "pdf":
+        return void toast.promise(downloadFile(`/invoices/${row.id}/pdf?issue=false`, `${row.number}.pdf`), {
+          loading: `Creating PDF for ${row.number}...`,
+          success: (name) => `Saved ${name}`,
+          error: (e: unknown) => (e instanceof Error ? e.message : "Could not create the PDF"),
+        })
       case "duplicate":
         return run.mutate(
           { id: row.id, action: "duplicate" },

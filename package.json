@@ -20,10 +20,12 @@
     "e2e:server": "cross-env DATA_DIR=./.e2e-data PORT=3002 WEB_PORT=5174 pnpm db:reset && cross-env DATA_DIR=./.e2e-data PORT=3002 WEB_PORT=5174 pnpm user:create --username demo --password demo1234 --workspace \"Menon Design Studio\" && cross-env DATA_DIR=./.e2e-data PORT=3002 WEB_PORT=5174 pnpm -r --parallel --filter web --filter server e2e"
   },
   "devDependencies": {
+    "@napi-rs/canvas": "^1.0.10",
     "@playwright/test": "^1.63.0",
     "@types/node": "^24.19.1",
     "cross-env": "^10.1.0",
     "pdf-lib": "^1.17.1",
+    "pdfjs-dist": "^6.4.299",
     "prettier": "^3.9.9",
     "prettier-plugin-tailwindcss": "^0.8.1",
     "rimraf": "^6.1.3",

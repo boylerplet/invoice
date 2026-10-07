@@ -41,3 +41,8 @@ One line per decision: what + why. Newest at the bottom.
 - The Trash is a tab (`?tab=trash`) of the invoice list; restoring a draft returns it with its original number.
 - Dashboard "Paid this year" follows the reporting year: calendar year, or the financial year when numbering period is financial. Overdue / aging are computed server-side from the workspace-timezone "today"; currencies are never summed together.
 - The command palette searches the workspace's live invoices (first 200) and active clients; opened with Ctrl/Cmd+K or the header button.
+- The print page authenticates with an HMAC token (PRINT_SECRET) bound to workspace + invoice id + expiry (60 s), not to a session; `GET /api/print/:id` is the only unauthenticated data endpoint. The token carries the workspace id so the lookup stays workspace-scoped.
+- `PRINT_BASE_URL` (optional): where headless Chrome opens `/print/:id`. Default is this server when `apps/web/dist` exists (production), else the Vite dev server on `WEB_PORT`.
+- PDF export uses one warm `puppeteer-core` browser (Edge/Chrome/Chromium auto-detected, or PUPPETEER_EXECUTABLE_PATH), one page per request, closed on SIGINT/SIGTERM. A missing browser returns a 503 with install guidance and logs a warning at startup.
+- Exporting a draft via "Export & mark as issued" issues first (strict validation applies); exporting an issued/paid/cancelled invoice never changes its status. Editor export is blocked while an ISSUED invoice has unsaved edits (the PDF is made from saved data).
+- PDF/preview parity is asserted per page in Playwright: same page count, correct page size, and identical text per page (pdfjs text vs the preview DOM). `scripts/qa-pdf.ts` + `scripts/pdf-to-png.ts` render a PDF to PNGs for a visual check.

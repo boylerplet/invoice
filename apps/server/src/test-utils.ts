@@ -6,6 +6,7 @@ import { createApp } from "./app"
 import type { Config } from "./config"
 import { openDb, type Db } from "./db/client"
 import type { Deps } from "./http/types"
+import type { PdfRenderer } from "./services/pdf"
 import { createUser } from "./services/users"
 
 export interface TestEnv {
@@ -15,7 +16,7 @@ export interface TestEnv {
   clock: { now: Date }
 }
 
-export function makeEnv(start = "2026-06-15T10:00:00Z"): TestEnv {
+export function makeEnv(start = "2026-06-15T10:00:00Z", pdf?: PdfRenderer): TestEnv {
   const dataDir = mkdtempSync(join(tmpdir(), "invoice-test-"))
   const uploadsDir = join(dataDir, "uploads")
   mkdirSync(uploadsDir)
@@ -32,11 +33,12 @@ export function makeEnv(start = "2026-06-15T10:00:00Z"): TestEnv {
     defaultTimezone: "Asia/Kolkata",
     webDist: join(dataDir, "no-web"),
     allowedOrigins: [],
+    printBaseUrl: "http://127.0.0.1:0",
   }
   const clock = { now: new Date(start) }
   const db = openDb(":memory:")
   const deps: Deps = { config, db, now: () => clock.now }
-  return { deps, db, app: createApp(deps), clock }
+  return { deps, db, app: createApp(deps, pdf), clock }
 }
 
 export async function addUser(env: TestEnv, username: string, workspaceName: string, password = "password123") {

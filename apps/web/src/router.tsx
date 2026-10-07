@@ -9,6 +9,7 @@ import { ActivityPage } from "@/features/activity/ActivityPage"
 import { ClientPage } from "@/features/clients/ClientPage"
 import { ClientsPage } from "@/features/clients/ClientsPage"
 import { DashboardPage } from "@/features/dashboard/DashboardPage"
+import { PrintPage } from "@/features/print/PrintPage"
 import { SettingsLayout } from "@/features/settings/SettingsLayout"
 import { FixturePrint } from "@/features/templates/FixturePrint"
 import { RegistryDump } from "@/features/templates/RegistryDump"
@@ -23,6 +24,7 @@ export const router = createBrowserRouter([
       ]
     : []),
   { path: "/login", element: <LoginPage /> },
+  { path: "/print/:id", element: <PrintPage /> },
   {
     element: <RequireAuth />,
     children: [

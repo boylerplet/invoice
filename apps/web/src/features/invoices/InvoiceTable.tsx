@@ -16,7 +16,7 @@ import { Icon } from "@/components/Icon"
 import { StatusBadge } from "@/components/StatusBadge"
 import { money, shortDate } from "@/lib/format"
 
-export type RowAction = "open" | "duplicate" | "pay" | "cancel" | "discard" | "reopen" | "restore"
+export type RowAction = "open" | "pdf" | "duplicate" | "pay" | "cancel" | "discard" | "reopen" | "restore"
 
 interface InvoiceTableProps {
   rows: InvoiceListRowDto[]
@@ -52,6 +52,7 @@ function RowMenu({ row, onAction }: { row: InvoiceListRowDto; onAction: InvoiceT
           ) : (
             <>
               <DropdownMenuItem onClick={() => onAction("open", row)}>Open</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => onAction("pdf", row)}>Download PDF</DropdownMenuItem>
               {row.status === "ISSUED" && <DropdownMenuItem onClick={() => onAction("pay", row)}>Mark paid</DropdownMenuItem>}
               {row.status === "PAID" && <DropdownMenuItem onClick={() => onAction("reopen", row)}>Reopen</DropdownMenuItem>}
               <DropdownMenuItem onClick={() => onAction("duplicate", row)}>Duplicate</DropdownMenuItem>

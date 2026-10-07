@@ -11,11 +11,13 @@ import { ConfirmDialog } from "@/components/ConfirmDialog"
 import { Field } from "@/components/form/Field"
 import { EmptyState } from "@/components/PageHeader"
 import { CancelDialog, PayDialog, SimpleActionDialog } from "@/features/invoices/InvoiceDialogs"
+import { downloadFile } from "@/lib/download"
 import { shortDate } from "@/lib/format"
 import { useInvoice, useInvoiceAction } from "@/lib/invoiceQueries"
 import { useMe } from "@/lib/queries"
 import { useMediaQuery } from "@/lib/useMediaQuery"
 import { EditorForm } from "./EditorForm"
+import { ExportDialog } from "./ExportDialog"
 import { EditorHeader, type HeaderAction } from "./EditorHeader"
 import { selectDirty, useEditorStore } from "./editorStore"
 import { PreviewPanel } from "./PreviewPanel"
@@ -84,6 +86,7 @@ export function EditorPage() {
 
   const [dialog, setDialog] = useState<HeaderAction | "save" | null>(null)
   const [changeNote, setChangeNote] = useState("")
+  const [exporting, setExporting] = useState(false)
 
   // Load the server document into the editor once per invoice.
   useEffect(() => {
@@ -139,8 +142,33 @@ export function EditorPage() {
 
   const errorFor = (path: string) => (showErrors || status !== "DRAFT" ? issues.byPath[path] : undefined)
 
+  async function exportPdf(issue: boolean) {
+    if (!detail) return
+    setExporting(true)
+    try {
+      const name = await downloadFile(`/invoices/${detail.id}/pdf?issue=${issue}`, `${detail.number}.pdf`)
+      toast.success(`Saved ${name}`)
+      setDialog(null)
+      if (issue) {
+        const fresh = await query.refetch()
+        if (fresh.data) reload(fresh.data)
+      }
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Could not create the PDF")
+    } finally {
+      setExporting(false)
+    }
+  }
+
   async function onAction(action: HeaderAction) {
     if (!detail) return
+    if (action === "export") {
+      if (!(await saver.flush())) return
+      if (status === "DRAFT") setDialog("export")
+      else if (dirty) toast.info("Save your changes first so they are included in the PDF")
+      else void exportPdf(false)
+      return
+    }
     if (action === "issue") {
       if (!(await saver.flush())) return
       if (!issues.valid) {
@@ -192,6 +220,7 @@ export function EditorPage() {
         </Tabs>
       )}
 
+      <ExportDialog open={dialog === "export"} onOpenChange={(open) => !open && close()} busy={exporting} onChoose={(issue) => void exportPdf(issue)} />
       <SimpleActionDialog action={dialog === "issue" || dialog === "reopen" || dialog === "discard" ? dialog : null} target={dialog ? target : null} onClose={close} onDone={(next) => { if (dialog === "discard") navigate("/invoices"); else reload(next) }} />
       <PayDialog target={dialog === "pay" ? target : null} today={today} onClose={close} onDone={reload} />
       <CancelDialog target={dialog === "cancel" ? target : null} onClose={close} onDone={reload} />

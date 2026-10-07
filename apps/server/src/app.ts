@@ -8,14 +8,16 @@ import type { AppEnv, Deps } from "./http/types"
 import { authRoutes } from "./routes/auth"
 import { clientRoutes } from "./routes/clients"
 import { invoiceRoutes } from "./routes/invoices"
+import { printRoutes } from "./routes/print"
 import { overviewRoutes } from "./routes/overview"
 import { paymentAccountRoutes, profileRoutes } from "./routes/profiles"
 import { workspaceRoutes } from "./routes/workspace"
 import { createBackupService } from "./services/backup"
 import { createInvoiceService } from "./services/invoices"
+import { createPdfRenderer, type PdfRenderer } from "./services/pdf"
 import { createStatsService } from "./services/stats"
 
-export function createApp(deps: Deps) {
+export function createApp(deps: Deps, pdf: PdfRenderer = createPdfRenderer(deps.config)) {
   const app = new Hono<AppEnv>()
   const stats = createStatsService(deps)
   const invoices = createInvoiceService(deps)
@@ -37,6 +39,7 @@ export function createApp(deps: Deps) {
   api.use("*", originCheck(deps))
   api.get("/health", (c) => c.json({ ok: true }))
   api.route("/auth", authRoutes(deps))
+  api.route("/print", printRoutes(deps))
 
   const secured = new Hono<AppEnv>()
   secured.use("*", guard)
@@ -44,7 +47,7 @@ export function createApp(deps: Deps) {
   secured.route("/issuer-profiles", profileRoutes(deps))
   secured.route("/payment-accounts", paymentAccountRoutes(deps))
   secured.route("/clients", clientRoutes(deps, stats))
-  secured.route("/invoices", invoiceRoutes(deps, invoices))
+  secured.route("/invoices", invoiceRoutes(deps, invoices, pdf))
   secured.route("/", overviewRoutes(deps, stats, backup))
   api.route("/", secured)
   api.notFound((c) => c.json({ error: { code: "NOT_FOUND", message: "Unknown endpoint" } }, 404))
@@ -70,5 +73,5 @@ export function createApp(deps: Deps) {
     app.get("*", (c) => c.html(html))
   }
 
-  return app
+  return Object.assign(app, { closePdf: () => pdf.close() })
 }

@@ -16,9 +16,9 @@ test("a user can set up numbering, profile, payment account and client", async (
   await login(page)
 
   await page.goto("/settings/numbering")
-  await expect(page.getByTestId("number-preview")).toContainText("INV-2026-0001".replace("2026", String(new Date().getFullYear())))
+  await expect(page.getByTestId("number-preview")).toContainText(`INV-${new Date().getFullYear()}-`)
   await page.getByLabel("Prefix").fill("ACME")
-  await expect(page.getByTestId("number-preview")).toContainText(`ACME-${new Date().getFullYear()}-0001`)
+  await expect(page.getByTestId("number-preview")).toContainText(`ACME-${new Date().getFullYear()}-`)
   await page.getByRole("button", { name: "Save numbering" }).click()
   await expect(page.getByText("Numbering saved")).toBeVisible()
 

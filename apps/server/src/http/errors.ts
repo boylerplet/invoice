@@ -1,6 +1,6 @@
 import type { ZodType } from "zod"
 
-export type ErrorStatus = 400 | 401 | 403 | 404 | 409 | 413 | 415 | 422 | 429 | 500
+export type ErrorStatus = 400 | 401 | 403 | 404 | 409 | 413 | 415 | 422 | 429 | 500 | 503
 
 export class ApiError extends Error {
   constructor(

@@ -15,7 +15,10 @@ import { ApiError, parse } from "../http/errors"
 import type { AppEnv, Deps } from "../http/types"
 import { invoicesRepo } from "../repos/invoices"
 import { workspacesRepo } from "../repos/workspaces"
+import { activityRepo } from "../repos/activity"
 import type { InvoiceService } from "../services/invoices"
+import { pdfFilename, type PdfRenderer } from "../services/pdf"
+import { signPrintToken } from "../services/printToken"
 
 const isoDate = z.string().refine(isValidIsoDate, "Use YYYY-MM-DD")
 
@@ -38,7 +41,7 @@ const previewSchema = z.object({
   date: isoDate.optional(),
 })
 
-export function invoiceRoutes(deps: Deps, service: InvoiceService) {
+export function invoiceRoutes(deps: Deps, service: InvoiceService, pdf: PdfRenderer) {
   const app = new Hono<AppEnv>()
 
   app.get("/", (c) => {
@@ -89,6 +92,26 @@ export function invoiceRoutes(deps: Deps, service: InvoiceService) {
   app.post("/:id/duplicate", (c) => c.json(service.duplicate(c.get("auth"), c.req.param("id")), 201))
   app.post("/:id/discard", (c) => c.json(service.discard(c.get("auth"), c.req.param("id"))))
   app.post("/:id/restore", (c) => c.json(service.restore(c.get("auth"), c.req.param("id"))))
+
+  app.get("/:id/pdf", async (c) => {
+    const auth = c.get("auth")
+    const id = c.req.param("id")
+    let detail = service.get(auth.workspaceId, id)
+    // "Export & mark as issued": issue first, so the PDF shows the issued state.
+    if (c.req.query("issue") === "true" && detail.status === "DRAFT") detail = service.issue(auth, id)
+    const token = signPrintToken(deps.config.printSecret, { ws: auth.workspaceId, id, rev: detail.revision }, deps.now())
+    const bytes = await pdf.render(`${deps.config.printBaseUrl}/print/${id}?token=${encodeURIComponent(token)}`)
+    activityRepo(deps.db).log(auth.workspaceId, { userId: auth.userId, invoiceId: id, clientId: detail.doc.client.clientId, type: "invoice.exported", summary: `Exported ${detail.number} as PDF` }, deps.now())
+    const filename = pdfFilename(detail.number, detail.doc.client.name)
+    const ascii = filename.replace(/[^ -~]/g, "_")
+    return new Response(bytes, {
+      headers: {
+        "Content-Type": "application/pdf",
+        "Content-Disposition": `attachment; filename="${ascii}"; filename*=UTF-8''${encodeURIComponent(filename)}`,
+        "Cache-Control": "no-store",
+      },
+    })
+  })
 
   app.get("/:id/revisions", (c) => c.json(service.revisions(c.get("auth").workspaceId, c.req.param("id"))))
 

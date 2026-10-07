@@ -36,6 +36,7 @@ import {
   SidebarTrigger,
 } from "@workspace/ui/components/sidebar"
 import { Icon } from "@/components/Icon"
+import { CommandPalette } from "./CommandPalette"
 import { api } from "@/lib/api"
 
 interface NavItem {
@@ -109,6 +110,7 @@ export function AppShell({ workspaceName, username, children }: Props) {
           <SidebarTrigger />
           <span className="text-muted-foreground truncate text-sm">{workspaceName}</span>
           <div className="flex-1" />
+          <CommandPalette />
           <DropdownMenu>
             <DropdownMenuTrigger render={<Button variant="ghost" size="icon" aria-label="Account menu" />}>
               <Avatar className="size-7">

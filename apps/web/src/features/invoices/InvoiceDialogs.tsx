@@ -20,7 +20,8 @@ const errorText = (error: unknown) => (error instanceof Error ? error.message : 
 /** Mark paid: asks for the payment date and an optional note. */
 export function PayDialog({ target, today, onClose, onDone }: DialogProps) {
   const pay = usePayAction()
-  const [paidDate, setPaidDate] = useState(today)
+  const [edited, setPaidDate] = useState<string | null>(null)
+  const paidDate = edited ?? today
   const [note, setNote] = useState("")
   return (
     <ConfirmDialog
@@ -34,7 +35,7 @@ export function PayDialog({ target, today, onClose, onDone }: DialogProps) {
         if (!target) return
         pay.mutate(
           { id: target.id, input: { paidDate, note: note || null } },
-          { onSuccess: (detail) => { toast.success(`${target.number} marked as paid`); onClose(); onDone?.(detail) }, onError: (e) => toast.error(errorText(e)) }
+          { onSuccess: (detail) => { toast.success(`${target.number} marked as paid`); setPaidDate(null); setNote(""); onClose(); onDone?.(detail) }, onError: (e) => toast.error(errorText(e)) }
         )
       }}
     >

@@ -37,3 +37,7 @@ One line per decision: what + why. Newest at the bottom.
 - Zoom is a CSS scale of the unchanged layout; layout runs once at 100% geometry. Fit width/page recompute from the viewport; the page indicator follows the scroll position.
 - Payment details are hidden from the view model when the chosen account has no lines (no empty "Payment details" heading).
 - "History" shows read-only previews of any revision; "Restore as new revision" is offered for ISSUED invoices and saves the old content as a new revision (note "Restored revision N").
+- List state (search, status, client, profile, currency, date range, sort, tab) lives in the URL query string via `useListParams`; the "group by profile" toggle is local UI state (it only reorders the current result).
+- The Trash is a tab (`?tab=trash`) of the invoice list; restoring a draft returns it with its original number.
+- Dashboard "Paid this year" follows the reporting year: calendar year, or the financial year when numbering period is financial. Overdue / aging are computed server-side from the workspace-timezone "today"; currencies are never summed together.
+- The command palette searches the workspace's live invoices (first 200) and active clients; opened with Ctrl/Cmd+K or the header button.

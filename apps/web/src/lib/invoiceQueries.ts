@@ -1,4 +1,4 @@
-import { useQuery, useQueryClient } from "@tanstack/react-query"
+import { useInfiniteQuery, useQuery, useQueryClient } from "@tanstack/react-query"
 import type {
   ActivityPageDto,
   CancelInput,
@@ -45,11 +45,12 @@ export const useRevision = (id: string, rev: number | null) =>
 
 export const useDashboard = () => useQuery({ queryKey: invoiceKeys.dashboard, queryFn: () => api.get<DashboardDto>("/dashboard") })
 
-export const useActivity = (cursor: string | null) =>
-  useQuery({
-    queryKey: [...invoiceKeys.activity, cursor],
-    queryFn: () => api.get<ActivityPageDto>(`/activity${queryString({ cursor })}`),
-    placeholderData: (previous) => previous,
+export const useActivity = () =>
+  useInfiniteQuery({
+    queryKey: invoiceKeys.activity,
+    initialPageParam: null as string | null,
+    queryFn: ({ pageParam }) => api.get<ActivityPageDto>(`/activity${queryString({ cursor: pageParam })}`),
+    getNextPageParam: (last) => last.next,
   })
 
 /** Everything that depends on invoice data is refreshed after a change. */

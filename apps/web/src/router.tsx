@@ -1,22 +1,18 @@
 import { createBrowserRouter, Navigate } from "react-router"
-import { PageHeader } from "@/components/PageHeader"
 import { LoginPage } from "@/features/auth/LoginPage"
 import { RequireAuth } from "@/features/auth/RequireAuth"
 import { EditorPage } from "@/features/editor/EditorPage"
 import { HistoryPage } from "@/features/invoices/HistoryPage"
+import { InvoicesPage } from "@/features/invoices/InvoicesPage"
 import { NewInvoicePage } from "@/features/invoices/NewInvoicePage"
+import { ActivityPage } from "@/features/activity/ActivityPage"
+import { ClientPage } from "@/features/clients/ClientPage"
 import { ClientsPage } from "@/features/clients/ClientsPage"
+import { DashboardPage } from "@/features/dashboard/DashboardPage"
 import { SettingsLayout } from "@/features/settings/SettingsLayout"
 import { FixturePrint } from "@/features/templates/FixturePrint"
 import { RegistryDump } from "@/features/templates/RegistryDump"
 import { TemplateLab } from "@/features/templates/TemplateLab"
-
-/** Screens built in later phases. */
-const Later = ({ title }: { title: string }) => (
-  <div className="p-6">
-    <PageHeader title={title} description="Coming in a later build phase." />
-  </div>
-)
 
 export const router = createBrowserRouter([
   ...(import.meta.env.DEV
@@ -30,14 +26,14 @@ export const router = createBrowserRouter([
   {
     element: <RequireAuth />,
     children: [
-      { path: "/", element: <Later title="Dashboard" /> },
-      { path: "/invoices", element: <Later title="Invoices" /> },
+      { path: "/", element: <DashboardPage /> },
+      { path: "/invoices", element: <InvoicesPage /> },
       { path: "/invoices/new", element: <NewInvoicePage /> },
       { path: "/invoices/:id", element: <EditorPage /> },
       { path: "/invoices/:id/history", element: <HistoryPage /> },
       { path: "/clients", element: <ClientsPage /> },
-      { path: "/clients/:id", element: <Later title="Client" /> },
-      { path: "/activity", element: <Later title="Activity" /> },
+      { path: "/clients/:id", element: <ClientPage /> },
+      { path: "/activity", element: <ActivityPage /> },
       { path: "/settings", element: <Navigate to="/settings/business" replace /> },
       { path: "/settings/:tab", element: <SettingsLayout /> },
     ],

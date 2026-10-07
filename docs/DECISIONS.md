@@ -21,3 +21,11 @@ One line per decision: what + why. Newest at the bottom.
 - Backup ZIP includes every file in `data/uploads` (single-workspace deployment), plus `data.json` without password hashes.
 - Duplicating an invoice copies its snapshots as-is (does not refresh from client/profile) and allocates a number from today's period.
 - Server migrations are SQL files in `apps/server/drizzle`, generated with `pnpm --filter server exec drizzle-kit generate`, applied on every start.
+- `FontFaceDef` gained an optional `unicodeRange` (fonts ship as latin + latin-ext subsets; ₹ is in latin-ext). `TemplateManifest.tokens` keys are full CSS custom property names (`--ink`).
+- The page element carries the template class and tokens itself (page = template root) so `PageDecoration` can be absolutely positioned against the page while staying inside the scoped CSS.
+- Measuring happens in an off-screen React root created and torn down by `measureInvoice()`; `useInvoiceLayout` keeps the last good layout (with the vm that produced it) on screen while re-measuring. Callers must memoize the vm.
+- Row blocks are measured with `isFirstOnPage=false` / `isLastOnPage=false`; the template contract forbids block height depending on those flags.
+- Pagination safety margin is 1px; when totals do not fit, at least one row always moves with them (totals never sit alone); a terminal-alone page is a last resort only.
+- Template lab "page boxes" overlay shows page body and block outlines (no numeric heights). Dev routes (`/dev/templates/:id`, `/dev/registry`, `/print/fixture/:scenario`) exist only when `import.meta.env.DEV`.
+- `template:shots` and the Playwright suites drive the installed Edge via Playwright (`channel: msedge`) or `PUPPETEER_EXECUTABLE_PATH`; the dev server is addressed as `localhost` (Vite binds IPv6 localhost).
+- Template 01 footer wraps instead of truncating (fixed 9 mm height, two 7.5pt lines fit).

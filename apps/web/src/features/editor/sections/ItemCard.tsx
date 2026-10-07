@@ -223,6 +223,7 @@ export function ItemCard(props: ItemCardProps) {
           type="button"
           className="cursor-grab touch-none p-1 text-muted-foreground"
           aria-label={`Drag item ${index + 1}`}
+          title="Drag to reorder"
           disabled={disabled}
           {...attributes}
           {...listeners}

@@ -119,7 +119,7 @@ export function AppShell({ workspaceName, username, children }: Props) {
       </Sidebar>
       <SidebarInset className="min-w-0">
         <header className="sticky top-0 z-20 flex h-12 shrink-0 items-center gap-2 border-b bg-background px-3">
-          <SidebarTrigger />
+          <SidebarTrigger title="Show or hide the menu" />
           <span className="truncate text-sm text-muted-foreground">
             {workspaceName}
           </span>

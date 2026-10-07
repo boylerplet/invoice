@@ -47,6 +47,8 @@ function Button({
     <ButtonPrimitive
       data-slot="button"
       className={cn(buttonVariants({ variant, size, className }))}
+      // Icon-only buttons show their accessible name as a hover tooltip.
+      title={props.title ?? (size?.startsWith("icon") ? props["aria-label"] : undefined)}
       {...props}
     />
   )

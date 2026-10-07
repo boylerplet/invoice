@@ -52,3 +52,4 @@ One line per decision: what + why. Newest at the bottom.
 - Unknown URLs show a "Page not found" screen instead of silently redirecting; a route error boundary replaces blank pages on crashes.
 - `pnpm format` runs Prettier over code (not over docs written by the user). The web `typecheck` script uses `tsc -p tsconfig.app.json` because the root tsconfig only holds references.
 - The web app is a single JS chunk (about 1.1 MB); code splitting is left as optional polish.
+- Icon-only buttons (size icon*) show their aria-label as a native hover tooltip (title), set once in the shared Button; the drag handle and sidebar toggle have explicit titles.
